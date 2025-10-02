@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Final">
         <activity
-            android:name=".MainActivity"
+            android:name=".test_firebase"
             android:exported="true"
             android:label="@string/app_name"
-            android:theme="@style/Theme.Final">
+            android:theme="@style/Theme.AppCompat">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
