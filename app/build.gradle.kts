@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 
     id("com.google.gms.google-services")
-    alias(libs.plugins.google.android.libraries.mapsplatform.secrets.gradle.plugin)
 }
 
 android {
@@ -38,7 +37,6 @@ android {
         jvmTarget = "11"
     }
     buildFeatures {
-        viewBinding = true
         compose = true
     }
 }
@@ -47,18 +45,6 @@ dependencies {
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-
-    //GOOGLE MAP
-    implementation("com.google.android.gms:play-services-maps:18.1.0")
-    implementation(libs.androidx.activity)
-
-    //Navigation
-    val nav_version = "2.9.5"
-    implementation("androidx.navigation:navigation-fragment:${nav_version}")
-    implementation("androidx.navigation:navigation-ui:${nav_version}")
-
-    //Material Design
-    implementation("com.google.android.material:material:1.12.0")
 
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
 
@@ -78,8 +64,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.navigation.fragment.ktx)
-    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -87,9 +71,4 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-
-    //CUA NGUYEN TRI THANH
-    implementation("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation("org.json:json:20231013") // để dùng JSONObject
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.6")
 }
