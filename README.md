@@ -184,6 +184,20 @@ Chọn **Pixel 6a (API 34/36)** → Nhấn **Run ▶️**
 > [https://console.cloud.google.com/datastore/setup?project=android-final-f73c9-34887](https://console.cloud.google.com/datastore/setup?project=android-final-f73c9-34887)  
 > → chọn **Start in test mode** → **Create Database**
 
+## Quy tắc workflow cho team:
+
+ - Chỉ merge vào main qua Pull Request(khác với pull về máy) (không push trực tiếp).
+
+ - Mỗi thành viên tạo nhánh theo quy tắc: <tên>/<scope>/<mô_tả>
+
+  ví dụ:
+  
+  vy/ui/fix-bottom-navigation
+  
+  thanh/firebase/auth-register-screen
+  
+  huywork/env/setup-android-studio
+
 ---
 
 ## 🏁 Phiên bản hiện tại
