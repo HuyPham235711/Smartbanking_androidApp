@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import com.example.afinal.ui.auth.AuthNavigation
+import com.example.afinal.ui.officer.CreateAccountScreen
 import com.example.afinal.ui.theme.FinalTheme
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +16,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             FinalTheme {
                 // Hiển thị màn hình điều hướng xác thực
-                AuthNavigation()
+                //AuthNavigation()
+                //Hiển thị màn hình create account của officer
+                CreateAccountScreen()
             }
         }
     }

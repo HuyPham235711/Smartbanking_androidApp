@@ -1,11 +1,12 @@
-package com.example.afinal
+package com.example.afinal.ui.test
 
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.example.afinal.R
 import com.google.firebase.firestore.FirebaseFirestore
 
-class test_firebase : AppCompatActivity() {
+class TestFirestore : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.test_firebase) // layout trống cũng được

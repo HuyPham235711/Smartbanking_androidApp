@@ -1,7 +1,8 @@
-package com.example.afinal
+package com.example.afinal.ui.base
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.example.afinal.R
 
 class NavHostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
