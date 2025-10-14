@@ -1,6 +1,6 @@
 // Smartbanking_androidApp/app/src/main/java/com/example/afinal/AuthScreen.kt
 
-package com.example.afinal
+package com.example.afinal.ui.auth
 
 
 import android.widget.Toast
