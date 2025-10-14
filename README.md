@@ -2,6 +2,88 @@
 
 > Ứng dụng ngân hàng điện tử được phát triển bằng **Kotlin + Jetpack Compose + Firebase**
 
+
+## 🧱 (14/10/2025)**Cập nhật lớn: Refactor dự án sang mô hình MVVM (Model–View–ViewModel)**
+
+### 📌 Mục tiêu
+
+Chuẩn hoá kiến trúc toàn bộ project theo **MVVM pattern** và **Jetpack Compose UI**, giúp mã nguồn:
+
+* Dễ bảo trì & mở rộng.
+* Tách biệt rõ giữa UI, logic nghiệp vụ, và dữ liệu.
+* Không còn phụ thuộc vào XML layout cũ.
+
+---
+
+### 🔧 **Thay đổi chính trong cấu trúc thư mục**
+
+```
+com.example.afinal
+├── data                ← Model (dữ liệu, DAO, Repository)
+│   └── account
+│       ├── Account.kt
+│       ├── AccountDao.kt
+│       ├── AccountRepository.kt
+│       └── AppDatabase.kt
+│
+├── viewmodel           ← ViewModel (xử lý logic, state)
+│   └── account
+│       └── AccountViewModel.kt
+│
+└── ui                  ← View (Compose UI)
+    └── officer
+        └── CreateAccountScreen.kt
+```
+
+---
+
+### ⚙️ **Điểm cải tiến chính sau refactor**
+
+✅ Chuyển toàn bộ UI sang **Jetpack Compose** – không còn sử dụng file `.xml`.
+✅ Xoá bỏ `findViewById` / `R.layout.*`, thay bằng `@Composable` functions.
+✅ Tách biệt hoàn toàn **UI – ViewModel – Repository**.
+✅ Dữ liệu hiển thị realtime qua `Flow` + `collectAsState()`.
+✅ Dễ dàng mở rộng sang các module khác (Login, Map, Transaction,...).
+
+---
+
+### 🧠 **Kiến trúc mới (MVVM + Compose)**
+
+```
+🎨 UI (Compose)
+   ⇅ observe via Flow / State
+🧠 ViewModel
+   ⇅
+🧱 Repository
+   ⇅
+💾 DAO (Room)
+   ⇅
+🗃️ Database (Room)
+```
+
+> 📌 *Jetpack Compose đã thay thế hoàn toàn XML layout trong project.*
+> Mọi màn hình mới đều được xây dựng trực tiếp bằng Kotlin và `@Composable` functions.
+> Các file `res/layout/*.xml` cũ chỉ còn giữ lại tạm thời cho các phần đặc biệt (như Google Map).
+
+---
+
+### 🚀 **Hướng dẫn team khi phát triển tính năng mới**
+
+Khi thêm module mới (ví dụ `Transaction`, `Login`, `Map`):
+
+1. Tạo **Model + DAO + Repository** trong `data/<feature>`.
+2. Tạo **ViewModel** để xử lý logic và expose `Flow/State`.
+3. Tạo **Compose UI** trong `ui/<feature>` — không tạo XML.
+4. Giao tiếp qua ViewModel (không thao tác trực tiếp với database từ UI).
+
+---
+
+### 👥 **Người thực hiện refactor**
+
+**Phạm Huy** — refactor toàn bộ kiến trúc project sang MVVM + Jetpack Compose,
+chuẩn hoá cấu trúc thư mục, dữ liệu, ViewModel, và loại bỏ XML layout cũ.
+
+
 ---
 
 ## 🧱 Thành phần & Phiên bản
