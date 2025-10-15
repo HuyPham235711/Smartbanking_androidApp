@@ -1,23 +1,32 @@
 package com.example.afinal.data.account
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
+import com.example.afinal.data.savings.SavingsAccount
+import com.example.afinal.data.savings.SavingsAccountDao
+import com.example.afinal.data.interest.InterestRate
+import com.example.afinal.data.interest.InterestRateDao
 
 /**
  * AppDatabase — chứa toàn bộ bảng và DAO.
  * Dùng singleton để đảm bảo chỉ có 1 instance trong toàn app.
  */
 @Database(
-    entities = [Account::class], // Liệt kê các bảng
-    version = 1,
+    entities = [
+        Account::class,
+        SavingsAccount::class,
+        InterestRate::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
-    // Trỏ tới DAO
     abstract fun accountDao(): AccountDao
+    abstract fun savingsAccountDao(): SavingsAccountDao
+    abstract fun interestRateDao(): InterestRateDao
 
     companion object {
         @Volatile
@@ -28,8 +37,10 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "smartbanking_db" // tên file database
-                ).build()
+                    "smartbanking_db"
+                )
+                    .fallbackToDestructiveMigration() // cho dev nhanh
+                    .build()
                 INSTANCE = instance
                 instance
             }
