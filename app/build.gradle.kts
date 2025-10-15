@@ -9,6 +9,7 @@ plugins {
 android {
     namespace = "com.example.afinal"
     compileSdk = 36
+
     defaultConfig {
         applicationId = "com.example.afinal"
         minSdk = 26
@@ -16,6 +17,27 @@ android {
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = project.property("MAPS_API_KEY") as String
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file(project.property("MYAPP_DEBUG_STORE_FILE") as String)
+            storePassword = project.property("MYAPP_DEBUG_STORE_PASSWORD") as String
+            keyAlias = project.property("MYAPP_DEBUG_KEY_ALIAS") as String
+            keyPassword = project.property("MYAPP_DEBUG_KEY_PASSWORD") as String
+
+        }
+    }
+
+    buildTypes {
+        getByName("debug") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug") // dùng tạm key debug
+            isMinifyEnabled = false
+        }
     }
 
     compileOptions {
@@ -35,8 +57,8 @@ android {
 }
 
 
-
 dependencies {
+    implementation(libs.androidx.compose.foundation)
     // --- ROOM DATABASE ---
     val room_version = "2.6.1"
     implementation("androidx.room:room-runtime:$room_version")
@@ -65,6 +87,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation("androidx.compose.foundation:foundation-layout:1.7.3")
+    implementation("androidx.compose.ui:ui-text:1.7.3")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
