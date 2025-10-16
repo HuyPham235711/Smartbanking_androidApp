@@ -3,7 +3,7 @@ package com.example.afinal.viewmodel.officer
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.afinal.data.account.AppDatabase
+import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.interest.InterestRate
 import com.example.afinal.repository.InterestRateRepository
 import kotlinx.coroutines.flow.MutableStateFlow

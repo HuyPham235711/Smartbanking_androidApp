@@ -1,7 +1,7 @@
 package com.example.afinal.dev
 
 import android.content.Context
-import com.example.afinal.data.account.AppDatabase
+import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.interest.InterestRate
 import com.example.afinal.data.savings.SavingsAccount
 
