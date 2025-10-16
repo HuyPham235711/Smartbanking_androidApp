@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.afinal.data.account.Account
 import com.example.afinal.data.account.AccountRepository
-import com.example.afinal.data.account.AppDatabase
+import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.viewmodel.account.AccountViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

@@ -3,7 +3,7 @@ package com.example.afinal.viewmodel.customer
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.afinal.data.account.AppDatabase
+import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.savings.SavingsAccount
 import com.example.afinal.repository.SavingsRepository
 import com.example.afinal.utils.InterestCalculator

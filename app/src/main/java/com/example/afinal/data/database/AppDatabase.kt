@@ -1,13 +1,22 @@
-package com.example.afinal.data.account
+package com.example.afinal.data.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.afinal.data.savings.SavingsAccount
-import com.example.afinal.data.savings.SavingsAccountDao
+import com.example.afinal.data.account.Account
+import com.example.afinal.data.account.AccountDao
 import com.example.afinal.data.interest.InterestRate
 import com.example.afinal.data.interest.InterestRateDao
+import com.example.afinal.data.mortgage.MortgageAccountDao
+import com.example.afinal.data.savings.SavingsAccount
+import com.example.afinal.data.savings.SavingsAccountDao
+import com.example.afinal.data.transaction.TransactionEntity
+import com.example.afinal.data.transaction.TransactionDao
+import com.example.afinal.data.mortgage.MortgageAccountEntity
+import com.example.afinal.data.mortgage.MortgageScheduleDao
+import com.example.afinal.data.mortgage.MortgageScheduleEntity
+
 
 /**
  * AppDatabase — chứa toàn bộ bảng và DAO.
@@ -17,9 +26,12 @@ import com.example.afinal.data.interest.InterestRateDao
     entities = [
         Account::class,
         SavingsAccount::class,
-        InterestRate::class
+        InterestRate::class,
+        TransactionEntity::class,
+        MortgageAccountEntity::class,
+        MortgageScheduleEntity::class
     ],
-    version = 2,
+    version = 4,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -27,6 +39,13 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun accountDao(): AccountDao
     abstract fun savingsAccountDao(): SavingsAccountDao
     abstract fun interestRateDao(): InterestRateDao
+
+    abstract fun transactionDao(): TransactionDao
+
+    abstract fun mortgageAccountDao(): MortgageAccountDao
+
+    abstract fun mortgageScheduleDao(): MortgageScheduleDao
+
 
     companion object {
         @Volatile
