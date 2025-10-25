@@ -31,7 +31,7 @@ import com.example.afinal.data.mortgage.MortgageScheduleEntity
         MortgageAccountEntity::class,
         MortgageScheduleEntity::class
     ],
-    version = 4,
+    version = 13,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

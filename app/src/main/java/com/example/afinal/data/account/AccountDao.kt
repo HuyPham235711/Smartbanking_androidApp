@@ -1,6 +1,7 @@
 package com.example.afinal.data.account
 
 import androidx.room.*
+import kotlinx.coroutines.flow.Flow
 
 /**
  * DAO (Data Access Object) — cung cấp các hàm CRUD cho bảng Account
@@ -8,23 +9,29 @@ import androidx.room.*
 @Dao
 interface AccountDao {
 
-    // Lấy toàn bộ tài khoản
     @Query("SELECT * FROM accounts")
     suspend fun getAllAccounts(): List<Account>
 
-    // Lấy 1 tài khoản theo id
-    @Query("SELECT * FROM accounts WHERE id = :id")
-    suspend fun getAccountById(id: Int): Account?
 
-    // Thêm tài khoản mới
+    @Query("SELECT * FROM accounts WHERE id = :id")
+    suspend fun getAccountById(id: String): Account?   // ✅ đổi Int → String
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAccount(account: Account)
 
-    // Cập nhật tài khoản
     @Update
     suspend fun updateAccount(account: Account)
 
-    // Xóa tài khoản
     @Delete
     suspend fun deleteAccount(account: Account)
+
+    @Query("SELECT * FROM accounts")
+    suspend fun getAll(): List<Account>
+
+    @Query("SELECT id FROM accounts ORDER BY id LIMIT 1")
+    suspend fun getFirstAccountId(): String?           // ✅ đổi Int → String
+
+    @Query("SELECT * FROM accounts")
+    fun observeAll(): Flow<List<Account>>
 }
+
