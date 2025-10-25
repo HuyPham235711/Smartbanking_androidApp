@@ -12,9 +12,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.afinal.data.transaction.TransactionEntity
 import java.util.*
+import com.example.afinal.viewmodel.transaction.TransactionViewModel
 
 @Composable
-fun TransactionHistoryScreen(viewModel: TransactionViewModel) {
+fun TransactionHistoryScreen(
+    viewModel: TransactionViewModel,
+    accountId: String   // ✅ thêm dòng này
+) {
     val transactions by viewModel.transactions.collectAsState()
 
     Column(
@@ -30,8 +34,19 @@ fun TransactionHistoryScreen(viewModel: TransactionViewModel) {
 
         Spacer(Modifier.height(12.dp))
 
-        Button(onClick = { viewModel.addSampleTransaction() }) {
-            Text("➕ Thêm giao dịch mẫu")
+        // ✅ Giờ có accountId thật
+        Button(onClick = {
+            val fakeTx = TransactionEntity(
+                accountId = accountId,   // ✅ dùng accountId thật
+                amount = 5000.0,
+                type = "DEPOSIT",
+                description = "Giao dịch test thủ công",
+                currency = "VND",
+                timestamp = System.currentTimeMillis()
+            )
+            viewModel.addTransaction(fakeTx)
+        }) {
+            Text("Thêm giao dịch test")
         }
 
         Spacer(Modifier.height(12.dp))
@@ -49,6 +64,7 @@ fun TransactionHistoryScreen(viewModel: TransactionViewModel) {
         }
     }
 }
+
 
 @Composable
 fun TransactionItem(item: TransactionEntity) {

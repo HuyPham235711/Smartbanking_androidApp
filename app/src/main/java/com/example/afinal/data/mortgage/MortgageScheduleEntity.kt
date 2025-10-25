@@ -3,6 +3,7 @@ package com.example.afinal.data.mortgage
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 @Entity(
     tableName = "mortgage_schedules",
@@ -16,12 +17,13 @@ import androidx.room.PrimaryKey
     ]
 )
 data class MortgageScheduleEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
-    val mortgageId: Long,          // Khóa ngoại -> MortgageAccountEntity.id
-    val period: Int,               // Kỳ thứ mấy (1, 2, 3, ...)
-    val dueDate: Long,             // Ngày đến hạn (epoch millis)
-    val principalAmount: Long,     // Gốc phải trả kỳ này
-    val interestAmount: Long,      // Lãi phải trả kỳ này
-    val totalAmount: Long,         // Tổng = gốc + lãi
-    val status: String = "PENDING" // PENDING / PAID
+    @PrimaryKey val id: String = UUID.randomUUID().toString(), // 🔄 UUID
+    val mortgageId: String, // 🔄 thay Long → String
+    val period: Int,
+    val dueDate: Long,
+    val principalAmount: Double,
+    val interestAmount: Double,
+    val totalAmount: Double,
+    val status: String = "PENDING"
 )
+

@@ -13,8 +13,12 @@ interface TransactionDao {
     suspend fun insert(transaction: TransactionEntity)
 
     @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY timestamp DESC")
-    fun getTransactionsByAccount(accountId: Long): Flow<List<TransactionEntity>>
+    fun getTransactionsByAccount(accountId: String): Flow<List<TransactionEntity>>   // ✅ đổi Long → String
 
     @Query("DELETE FROM transactions")
     suspend fun clearAll()
+
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY timestamp DESC")
+    fun observeByAccountId(accountId: String): Flow<List<TransactionEntity>>
+
 }

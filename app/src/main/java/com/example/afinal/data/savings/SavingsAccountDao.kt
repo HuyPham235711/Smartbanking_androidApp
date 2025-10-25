@@ -1,20 +1,15 @@
 package com.example.afinal.data.savings
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import androidx.room.Update
-import androidx.room.Delete
+import androidx.room.*
 
 @Dao
 interface SavingsAccountDao {
 
-    @Query("SELECT * FROM savings_account WHERE ownerAccountId = :clientId")
-    suspend fun getByClient(clientId: Int): List<SavingsAccount>
+    @Query("SELECT * FROM savings_account WHERE ownerAccountId = :accountId")
+    suspend fun getByAccountId(accountId: String): List<SavingsAccount>
 
-    @Query("SELECT SUM(balance) FROM savings_account WHERE ownerAccountId = :clientId")
-    suspend fun getTotalBalance(clientId: Int): Double?
+    @Query("SELECT SUM(balance) FROM savings_account WHERE ownerAccountId = :accountId")
+    suspend fun getTotalBalance(accountId: String): Double?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(account: SavingsAccount)

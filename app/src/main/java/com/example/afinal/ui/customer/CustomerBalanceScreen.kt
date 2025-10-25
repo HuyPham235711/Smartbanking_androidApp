@@ -15,7 +15,7 @@ import com.example.afinal.viewmodel.customer.CustomerBalanceViewModel
 
 @Composable
 fun CustomerBalanceScreen(
-    customerId: Int,
+    customerId: String,
     vm: CustomerBalanceViewModel = viewModel()
 ) {
     LaunchedEffect(customerId) {
