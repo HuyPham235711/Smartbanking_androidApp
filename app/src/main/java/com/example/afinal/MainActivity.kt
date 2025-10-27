@@ -4,68 +4,45 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.afinal.ui.mortgage.MortgageListScreen
+import com.example.afinal.ui.mortgage.MortgageViewModel
 import com.example.afinal.ui.theme.FinalTheme
-import com.example.afinal.data.database.AppDatabase
-import com.example.afinal.data.transaction.TransactionRepository
 import com.example.afinal.ui.transaction.TransactionHistoryScreen
 import com.example.afinal.ui.transaction.TransactionViewModel
-import com.example.afinal.data.mortgage.MortgageRepository
-import com.example.afinal.ui.mortgage.MortgageListScreen
-import com.example.afinal.ui.mortgage.MortgageScheduleScreen
-import com.example.afinal.ui.mortgage.MortgageViewModel
+import com.example.afinal.viewmodel.ViewModelFactory
 
+/**
+ * MainActivity này chỉ dùng để test các màn hình riêng lẻ.
+ * Nó không phải là cửa vào chính của ứng dụng.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // === Khởi tạo Database và Repository ===
-        val db = AppDatabase.getDatabase(applicationContext)
+        val viewModelFactory = ViewModelFactory(applicationContext)
 
-        // Transaction (Task A)
-        val transRepo = TransactionRepository(db.transactionDao())
-        val transVm = TransactionViewModel(transRepo).apply { loadTransactions(1L) }
-
-        // Mortgage (Task B)
-        val mortgageRepo = MortgageRepository(
-            accountDao = db.mortgageAccountDao(),
-            scheduleDao = db.mortgageScheduleDao()
-        )
-        val mortgageVm = MortgageViewModel(mortgageRepo)
-
-        // === Giao diện chính ===
         setContent {
             FinalTheme {
+                // Bạn có thể test các màn hình khác bằng cách thay đổi code ở đây
                 val navController = rememberNavController()
+                NavHost(navController = navController, startDestination = "mortgage_list") {
 
-                NavHost(
-                    navController = navController,
-                    startDestination = "mortgage_list" // ⚠️ đổi sang "transaction" nếu test Task A
-                ) {
-                    // Task B
                     composable("mortgage_list") {
+                        val mortgageViewModel = ViewModelProvider(this@MainActivity, viewModelFactory)[MortgageViewModel::class.java]
                         MortgageListScreen(
-                            viewModel = mortgageVm,
-                            onSelect = { id ->
-                                navController.navigate("schedule/$id")
-                            }
-                        )
-                    }
-                    composable("schedule/{id}") { backStackEntry ->
-                        val id = backStackEntry.arguments?.getString("id")?.toLongOrNull() ?: 0L
-                        MortgageScheduleScreen(
-                            viewModel = mortgageVm,
-                            mortgageId = id,
-                            onBack = { navController.popBackStack() }
+                            viewModel = mortgageViewModel,
+                            onSelect = { /* Xử lý điều hướng test */ }
                         )
                     }
 
-                    // Task A (nếu cần xem lại)
                     composable("transaction") {
-                        TransactionHistoryScreen(viewModel = transVm)
+                        val transactionViewModel = ViewModelProvider(this@MainActivity, viewModelFactory)[TransactionViewModel::class.java]
+                        TransactionHistoryScreen(viewModel = transactionViewModel)
                     }
                 }
             }
