@@ -13,14 +13,18 @@ import com.example.afinal.data.account.Account
 import com.example.afinal.data.account.AccountRepository
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.viewmodel.account.AccountViewModel
+import com.example.afinal.viewmodel.account.AccountViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * Compose UI cho Officer quản lý tài khoản (Create / Update / Delete).
  */
 @Composable
-fun CreateAccountScreen() {
+fun CreateAccountScreen(
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
 
     // Lấy database & repository
@@ -28,12 +32,9 @@ fun CreateAccountScreen() {
     val repo = remember { AccountRepository(db.accountDao()) }
 
     // ViewModel
-    val viewModel = remember { AccountViewModel(repo) }
-
-    // ✅ Gọi loadAccounts() khi màn hình được tạo
-    LaunchedEffect(Unit) {
-        viewModel.loadAccounts()
-    }
+    val viewModel: AccountViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+        factory = AccountViewModelFactory(repo)
+    )
 
     // State cho form nhập
     var username by remember { mutableStateOf("") }
@@ -92,10 +93,10 @@ fun CreateAccountScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         // 🟢 Nút tạo hoặc cập nhật
-        Button(
+        Button (
             onClick = {
                 val account = Account(
-                    id = selectedAccount?.id ?: 0, // Nếu đang edit, giữ lại id
+                    id =  selectedAccount?.id ?: UUID.randomUUID().toString(), // Nếu đang edit, giữ lại id
                     username = username.trim(),
                     password = password.trim(),
                     fullName = fullName.trim(),

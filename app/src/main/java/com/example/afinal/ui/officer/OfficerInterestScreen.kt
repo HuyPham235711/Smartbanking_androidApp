@@ -15,6 +15,7 @@ import com.example.afinal.viewmodel.officer.InterestRateViewModel
 
 @Composable
 fun OfficerInterestScreen(
+    modifier: Modifier = Modifier,
     vm: InterestRateViewModel = viewModel()
 ) {
     LaunchedEffect(Unit) {
@@ -23,7 +24,11 @@ fun OfficerInterestScreen(
 
     val rates by vm.rates.collectAsState()
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Text("Chỉnh sửa lãi suất", style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.height(12.dp))
         Divider()

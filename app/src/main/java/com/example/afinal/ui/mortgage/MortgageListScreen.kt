@@ -11,46 +11,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.afinal.data.mortgage.MortgageAccountEntity
+import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import java.util.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.TopAppBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MortgageListScreen(
     viewModel: MortgageViewModel,
-    onSelect: (Long) -> Unit // nhấn vào 1 khoản vay để xem chi tiết
+    onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val accounts by viewModel.accounts.collectAsState()
 
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        Text(
-            text = "Khoản vay thế chấp",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        Button(onClick = {
-            // Thêm mẫu 1 khoản vay để test
-            viewModel.addMortgage(
-                accountName = "Vay mua nhà mẫu",
-                principal = 500_000_000L,
-                annualRate = 10.0,
-                termMonths = 24
-            )
-        }) {
-            Text("➕ Thêm khoản vay mẫu")
+    Scaffold(
+        topBar = {
+            TopAppBar(title = { Text("Khoản vay thế chấp") })
         }
-
-        Spacer(Modifier.height(16.dp))
-
-        if (accounts.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Chưa có khoản vay nào.")
-            }
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                items(accounts) { acc ->
-                    MortgageItem(acc, onSelect)
+    ) { innerPadding ->
+        Column(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            if (accounts.isEmpty()) {
+                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Chưa có khoản vay nào.")
+                }
+            } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(accounts) { acc ->
+                        MortgageItem(acc, onSelect)
+                    }
                 }
             }
         }
@@ -60,7 +58,7 @@ fun MortgageListScreen(
 @Composable
 private fun MortgageItem(
     account: MortgageAccountEntity,
-    onSelect: (Long) -> Unit
+    onSelect: (String) -> Unit
 ) {
     val startDate = remember(account.startDate) {
         val cal = Calendar.getInstance().apply { timeInMillis = account.startDate }
@@ -73,7 +71,7 @@ private fun MortgageItem(
     ) {
         Column(Modifier.padding(12.dp)) {
             Text(account.accountName, fontWeight = FontWeight.Bold)
-            Text("Số tiền vay: %,d VND".format(account.principal))
+            Text("Số tiền vay: %,.0f VND".format(account.principal))
             Text("Lãi suất: %.2f%% / năm".format(account.annualInterestRate))
             Text("Kỳ hạn: ${account.termMonths} tháng")
             Text("Bắt đầu: $startDate")

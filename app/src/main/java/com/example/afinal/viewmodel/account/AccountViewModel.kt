@@ -4,47 +4,50 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.afinal.data.account.Account
 import com.example.afinal.data.account.AccountRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
-/**
- * ViewModel kết nối giữa UI và Repository.
- * Quản lý dữ liệu & lifecycle-safe coroutine.
- */
 class AccountViewModel(private val repository: AccountRepository) : ViewModel() {
 
-    private val _accounts = MutableStateFlow<List<Account>>(emptyList())
-    val accounts: StateFlow<List<Account>> = _accounts
+    // ✅ Dòng dữ liệu realtime từ Room (Flow → StateFlow)
+    val accounts: StateFlow<List<Account>> = repository.observeAllAccounts()
+        .distinctUntilChanged()
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    fun loadAccounts() {
-        viewModelScope.launch {
-            _accounts.value = repository.getAllAccounts()
-        }
-    }
-
+    // ✅ Tạo tài khoản (local + push Firestore)
     fun createAccount(account: Account) {
         viewModelScope.launch {
             repository.insertAccount(account)
-            _accounts.value = repository.getAllAccounts()
-            println("✅ Inserted account: $account")
+            println("🟢 Created account ${account.username} (${account.id})")
         }
     }
 
+    // ✅ Cập nhật tài khoản
     fun updateAccount(account: Account) {
         viewModelScope.launch {
-            println("🟡 Updating account id=${account.id} username=${account.username}")
             repository.updateAccount(account)
-            loadAccounts()
+            println("🟡 Updated account ${account.username} (${account.id})")
         }
     }
 
+    // ✅ Xoá tài khoản (local + Firestore)
     fun deleteAccount(account: Account) {
         viewModelScope.launch {
             repository.deleteAccount(account)
-            loadAccounts()
+            println("🗑️ Deleted account ${account.username} (${account.id})")
         }
     }
 
-
+    // ✅ Lắng nghe thay đổi từ Firestore → chèn vào Room nếu khác biệt
+    init {
+        viewModelScope.launch {
+            repository.listenRemoteChanges()
+                .distinctUntilChanged()
+                .collect { remoteAccounts ->
+                    remoteAccounts.forEach { acc ->
+                        repository.insertAccount(acc, isRemote = true)
+                    }
+                }
+        }
+    }
 }

@@ -11,12 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.afinal.data.mortgage.MortgageScheduleEntity
+import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import java.util.*
 
 @Composable
 fun MortgageScheduleScreen(
     viewModel: MortgageViewModel,
-    mortgageId: Long,
+    mortgageId: String,
     onBack: () -> Unit
 ) {
     val schedule by viewModel.schedule.collectAsState()

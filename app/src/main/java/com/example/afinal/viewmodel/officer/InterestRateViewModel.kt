@@ -5,7 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.interest.InterestRate
-import com.example.afinal.repository.InterestRateRepository
+import com.example.afinal.data.interest.InterestRateRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -30,4 +30,16 @@ class InterestRateViewModel(app: Application) : AndroidViewModel(app) {
             _rates.value = repo.getAll() // reload lại để cập nhật UI
         }
     }
+
+    init {
+        viewModelScope.launch {
+            repo.listenRemoteChanges().collect { list ->
+                list.forEach { rate ->
+                    repo.upsert(rate.termMonths, rate.rate, isRemote = true)
+                }
+                _rates.value = repo.getAll()
+            }
+        }
+    }
+
 }
