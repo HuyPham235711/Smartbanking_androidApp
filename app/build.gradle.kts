@@ -97,4 +97,22 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // CameraX
+    val cameraxVersion = "1.3.4"
+    implementation("androidx.camera:camera-core:$cameraxVersion")
+    implementation("androidx.camera:camera-camera2:$cameraxVersion")
+    implementation("androidx.camera:camera-lifecycle:$cameraxVersion")
+    implementation("androidx.camera:camera-view:$cameraxVersion")
+
+    // Google ML Kit - Face Detection
+    implementation("com.google.mlkit:face-detection:16.1.6")
+
+    // Sinh trắc học
+    implementation("androidx.biometric:biometric-ktx:1.2.0-alpha05")
+
+    // Sử dụng coil
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    // permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
 }
