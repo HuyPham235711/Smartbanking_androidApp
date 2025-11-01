@@ -10,7 +10,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.afinal.ui.auth.*
 import com.example.afinal.ui.mortgage.MortgageListScreen
-import com.example.afinal.ui.mortgage.MortgageViewModel
+import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import com.example.afinal.ui.theme.FinalTheme
 import com.example.afinal.viewmodel.ViewModelFactory
 import com.example.afinal.viewmodel.auth.LoginViewModel

@@ -7,8 +7,8 @@ import com.example.afinal.data.auth.AuthRepository
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.mortgage.MortgageRepository
 import com.example.afinal.data.transaction.TransactionRepository
-import com.example.afinal.ui.mortgage.MortgageViewModel
-import com.example.afinal.ui.transaction.TransactionViewModel
+import com.example.afinal.viewmodel.mortgage.MortgageViewModel
+import com.example.afinal.viewmodel.transaction.TransactionViewModel
 import com.example.afinal.viewmodel.auth.LoginViewModel
 import com.example.afinal.viewmodel.auth.PhoneAuthViewModel
 import com.example.afinal.viewmodel.auth.RegisterViewModel

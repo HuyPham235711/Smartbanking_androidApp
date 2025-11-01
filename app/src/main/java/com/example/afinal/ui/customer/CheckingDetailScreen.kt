@@ -3,6 +3,7 @@ package com.example.afinal.ui.customer
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,6 +14,8 @@ import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -46,15 +49,50 @@ fun CheckingDetailScreen(
             if (account != null) {
                 // --- Card thông tin người dùng ---
                 Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = CardDefaults.cardElevation(6.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp),
+                    elevation = CardDefaults.cardElevation(6.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(Modifier.padding(16.dp)) {
-                        Text("👤  ${account.fullName}", style = MaterialTheme.typography.titleLarge)
+
+                        // Tên
+                        Text(
+                            text = "👤  ${account.fullName}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+
                         Spacer(Modifier.height(4.dp))
+
+                        // Email & phone & role
                         Text("Email: ${account.email}")
                         Text("SĐT: ${account.phone}")
                         Text("Vai trò: ${account.role}")
+
+                        Spacer(Modifier.height(12.dp))
+
+                        // Dòng divider
+                        Divider(color = Color.Gray.copy(alpha = 0.3f))
+
+                        Spacer(Modifier.height(12.dp))
+
+                        // Balance Section
+                        Text(
+                            text = "Số dư tài khoản",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Gray
+                        )
+
+                        val balanceFormatted = "%,.0f ₫".format(account.balance)
+
+                        Text(
+                            text = balanceFormatted,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = Color(0xFF2E7D32) // xanh đô mix ngân hàng
+                        )
                     }
                 }
 
