@@ -7,44 +7,38 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.example.afinal.viewmodel.savings.SavingViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SavingScreen(
     viewModel: SavingViewModel,
     accountId: String,
     modifier: Modifier = Modifier,
-    showAddDialog: Boolean = false,      // ✅ từ HomeScreen
-    onDialogDismiss: () -> Unit = {}     // ✅ callback đóng dialog
+    showAddDialog: Boolean = false,
+    onDialogDismiss: () -> Unit = {}
 ) {
     val savings by viewModel.savings.collectAsState()
     val totalBalance by viewModel.totalBalance.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(accountId) {
-        println("💾 Loading savings for account=$accountId")
         viewModel.loadSavings(accountId)
     }
 
-    // 🟢 chỉ giữ một Scaffold duy nhất
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Thêm sổ tiết kiệm")
-            }
-        }
-    ) { padding ->
+    Box( // ✅ dùng Box để xài align
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
         Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
-            Text("Sổ Tiết Kiệm", style = MaterialTheme.typography.titleLarge)
+            Text("Sổ Tiết Kiệm", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Text("Tổng tiền gửi: ${"%,.0f".format(totalBalance)} VND")
             Spacer(Modifier.height(16.dp))
@@ -60,7 +54,7 @@ fun SavingScreen(
             }
         }
 
-        // ✅ Dialog hiển thị khi showDialog = true
+
         if (showDialog || showAddDialog) {
             AddSavingDialog(
                 onDismiss = {

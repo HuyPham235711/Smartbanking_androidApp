@@ -13,9 +13,6 @@ import androidx.compose.ui.unit.dp
 import com.example.afinal.data.mortgage.MortgageAccountEntity
 import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import java.util.*
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,29 +23,30 @@ fun MortgageListScreen(
 ) {
     val accounts by viewModel.accounts.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text("Khoản vay thế chấp") })
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            if (accounts.isEmpty()) {
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Chưa có khoản vay nào.")
-                }
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(bottom = 80.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(accounts) { acc ->
-                        MortgageItem(acc, onSelect)
-                    }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        // ✅ Title giống Saving screen
+        Text(
+            "Khoản vay thế chấp",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(Modifier.height(8.dp))
+
+        if (accounts.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Chưa có khoản vay nào.")
+            }
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(bottom = 80.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(accounts) { acc ->
+                    MortgageItem(acc, onSelect)
                 }
             }
         }
