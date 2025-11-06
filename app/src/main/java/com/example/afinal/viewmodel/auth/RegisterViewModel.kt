@@ -46,4 +46,11 @@ class RegisterViewModel(private val repository: AuthRepository) : ViewModel() {
             }
         }
     }
+
+    /**
+     * ✅ HÀM MỚI: Reset State về trạng thái rỗng
+     */
+    fun resetState() {
+        _uiState.value = RegisterUiState()
+    }
 }

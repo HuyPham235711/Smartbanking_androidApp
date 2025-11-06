@@ -12,24 +12,25 @@ import androidx.compose.ui.unit.dp
 import com.example.afinal.viewmodel.auth.LoginEvent
 import com.example.afinal.viewmodel.auth.LoginViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
-/**
- * Composable cho màn hình Đăng nhập.
- * - Đây là một "Dumb View", chỉ nhận State từ ViewModel để hiển thị.
- * - Mọi tương tác của người dùng (nhập liệu, click) đều được gửi đến ViewModel.
- * - Các hành động điều hướng được truyền ra ngoài thông qua các callback lambda.
- */
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    // Lấy trạng thái UI từ ViewModel và tự động cập nhật khi có thay đổi
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    // Lắng nghe các sự kiện một lần (như điều hướng) từ ViewModel
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.resetState()
+        }
+    }
+
+    // Lắng nghe sự kiện (điều hướng)
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             when (event) {
@@ -38,10 +39,15 @@ fun LoginScreen(
         }
     }
 
-    // Lắng nghe và hiển thị lỗi nếu có từ ViewModel
+    // Lắng nghe sự kiện (lỗi)
     LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
+        uiState.error?.let { errorMessage ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
@@ -85,7 +91,26 @@ fun LoginScreen(
                 )
 
                 Button(
-                    onClick = viewModel::login,
+                    onClick = {
+                        val email = uiState.email.trim()
+                        val pass = uiState.pass.trim()
+
+                        if (email.isEmpty() && pass.isEmpty()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Vui lòng nhập email và mật khẩu")
+                            }
+                        } else if (email.isEmpty()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Vui lòng nhập email")
+                            }
+                        } else if (pass.isEmpty()) {
+                            scope.launch {
+                                snackbarHostState.showSnackbar("Vui lòng nhập mật khẩu")
+                            }
+                        } else {
+                            viewModel.login()
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !uiState.isLoading
                 ) {
@@ -96,7 +121,7 @@ fun LoginScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Login")
+                        Text("Đăng nhập")
                     }
                 }
 
