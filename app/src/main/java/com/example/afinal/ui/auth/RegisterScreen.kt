@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import com.example.afinal.viewmodel.auth.RegisterEvent
 import com.example.afinal.viewmodel.auth.RegisterViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
@@ -22,6 +23,12 @@ fun RegisterScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.resetState()
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
@@ -35,8 +42,13 @@ fun RegisterScreen(
     }
 
     LaunchedEffect(uiState.error) {
-        uiState.error?.let {
-            snackbarHostState.showSnackbar(message = it, duration = SnackbarDuration.Short)
+        uiState.error?.let { errorMessage ->
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
@@ -63,7 +75,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = uiState.pass,
                 onValueChange = viewModel::onPasswordChanged,
-                label = { Text("Mật khẩu") },
+                label = { Text("Mật khẩu (ít nhất 6 ký tự)") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
                 isError = uiState.error != null
@@ -71,14 +83,30 @@ fun RegisterScreen(
             Spacer(Modifier.height(16.dp))
 
             Button(
-                onClick = viewModel::register,
+                onClick = {
+                    val email = uiState.email.trim()
+                    val pass = uiState.pass.trim()
+
+                    if (email.isEmpty() || pass.isEmpty()) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Vui lòng nhập đầy đủ email và mật khẩu")
+                        }
+                    } else if (pass.length < 6) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar("Mật khẩu phải có ít nhất 6 ký tự")
+                        }
+                    }
+                    else {
+                        viewModel.register()
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !uiState.isLoading
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
                 } else {
-                    Text("Register")
+                    Text("Đăng ký")
                 }
             }
             Spacer(Modifier.height(8.dp))
