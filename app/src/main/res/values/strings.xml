@@ -1,3 +1,78 @@
 <resources>
     <string name="app_name">final</string>
+
+
+    <!-- Common -->
+    <string name="action_back">Back</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_share">Share</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_close">Close</string>
+
+    <!-- External Transfer -->
+    <string name="external_transfer_title">External Bank Transfer</string>
+    <string name="bank_label">Bank</string>
+    <string name="recipient_account_label">Recipient Account Number</string>
+    <string name="recipient_account_hint">Enter account number</string>
+    <string name="recipient_name_label">Account Holder Name</string>
+    <string name="recipient_name_hint">Enter account holder name</string>
+    <string name="inquiry_button">Inquiry</string>
+    <string name="account_holder_format">Account Holder: %s</string>
+
+    <string name="amount_label">Amount</string>
+    <string name="amount_hint">Enter amount (VND)</string>
+    <string name="amount_100k">100K</string>
+    <string name="amount_500k">500K</string>
+    <string name="amount_1m">1M</string>
+    <string name="amount_5m">5M</string>
+
+    <string name="description_label">Transfer Description</string>
+    <string name="description_hint">Enter description (optional)</string>
+
+    <string name="otp_label">OTP Verification</string>
+    <string name="otp_hint">Enter OTP code (6 digits)</string>
+    <string name="otp_timer_format">OTP valid for: %ds</string>
+    <string name="send_otp_button">Send OTP</string>
+    <string name="transfer_button">Transfer</string>
+    <string name="info_button">ℹ️ Transfer Guide</string>
+
+    <!-- Deposit -->
+    <string name="deposit_title">Deposit</string>
+    <string name="deposit_button">Deposit</string>
+    <string name="show_test_cards_button">Test Cards</string>
+
+    <!-- Transfer -->
+    <string name="transfer_title">Internal Transfer</string>
+    <string name="recipient_id_label">Recipient ID</string>
+    <string name="recipient_id_hint">Enter recipient ID</string>
+    <string name="amount_10k">10K</string>
+    <string name="amount_50k">50K</string>
+
+    <!-- Transaction History -->
+    <string name="transaction_history_title">Transaction History</string>
+    <string name="filter_all">All</string>
+    <string name="filter_deposit">Deposit</string>
+    <string name="filter_transfer">Transfer</string>
+    <string name="filter_withdraw">Withdraw</string>
+    <string name="total_amount_label">Total Amount</string>
+    <string name="total_count_format">%d transactions</string>
+    <string name="empty_transactions">No transactions found</string>
+
+    <!-- Transaction Detail -->
+    <string name="transaction_detail_title">Transaction Details</string>
+    <string name="transaction_id_label">Transaction ID</string>
+    <string name="status_label">Status</string>
+    <string name="type_label">Type</string>
+    <string name="amount_label_caps">Amount</string>
+    <string name="from_account_label">From Account</string>
+    <string name="to_account_label">To Account</string>
+    <string name="fee_label">Fee</string>
+    <string name="timestamp_label">Date &amp; Time</string>
+    <string name="payment_intent_id_label">Payment Intent ID</string>
+    <string name="balance_after_label">Balance After</string>
+    <string name="error_message_label">Error Message</string>
+    <string name="copy_id_button">Copy ID</string>
+    <string name="share_button">Share</string>
 </resources>
