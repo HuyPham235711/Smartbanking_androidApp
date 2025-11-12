@@ -9,6 +9,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AccountDao {
 
+    @Query("SELECT * FROM accounts WHERE email = :email LIMIT 1")
+    suspend fun getAccountByEmail(email: String): Account?
+
     @Query("SELECT * FROM accounts")
     suspend fun getAllAccounts(): List<Account>
 

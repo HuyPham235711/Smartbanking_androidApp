@@ -11,18 +11,27 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.afinal.ui.auth.*
 import com.example.afinal.ui.theme.FinalTheme
-import com.example.afinal.utils.SessionManager // 1. Import
+import com.example.afinal.utils.SessionManager
 import com.example.afinal.viewmodel.ViewModelFactory
 import com.example.afinal.viewmodel.auth.LoginViewModel
 import com.example.afinal.viewmodel.auth.PhoneAuthViewModel
 import com.example.afinal.viewmodel.auth.RegisterViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.PhoneAuthProvider
+import androidx.lifecycle.lifecycleScope
+import com.example.afinal.data.account.AccountRepository
+import com.example.afinal.data.database.AppDatabase
+import kotlinx.coroutines.launch
 
 
 class LoginActivity : ComponentActivity() {
 
     private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
+
+    // TRUY CẬP DATABASE
+    private val accountRepository: AccountRepository by lazy {
+        AccountRepository(AppDatabase.getDatabase(applicationContext).accountDao())
+    }
 
     // 2. Khai báo SessionManager
     private lateinit var sessionManager: SessionManager
@@ -38,9 +47,19 @@ class LoginActivity : ComponentActivity() {
 
         // 4. KIỂM TRA SESSION NGAY KHI MỞ APP (TRƯỚC SETCONTENT)
         if (auth.currentUser != null) {
-            // Nếu đã đăng nhập (Firebase token còn),
-            // thì đi thẳng vào app chính, KHÔNG hiển thị màn hình Login
-            goToMainActivity()
+            // ✅ SỬA LỖI 1: Phải lấy role bất đồng bộ giống như logic login
+            lifecycleScope.launch {
+                val user = auth.currentUser // Lấy user an toàn
+                if (user?.email != null) {
+                    // ⭐️ GỌI HÀM MỚI (ĐỌC TỪ FIRESTORE)
+                    val account = accountRepository.getAccountByEmailFromFirestore(user.email!!)
+                    val userRole = account?.role ?: "Customer"
+                    goToMainActivity(userRole)
+                } else {
+                    // Trường hợp hiếm: user tồn tại nhưng không có email (ví dụ: chỉ đăng nhập SĐT)
+                    goToMainActivity("Customer") // Mặc định là Customer
+                }
+            }
             return // Dừng hàm onCreate ở đây
         }
 
@@ -58,20 +77,31 @@ class LoginActivity : ComponentActivity() {
                         )
                     }
 
+                    // Đây là code bạn đã sửa đúng
                     composable("login") {
                         val loginViewModel = ViewModelProvider(this@LoginActivity, viewModelFactory)[LoginViewModel::class.java]
                         LoginScreen(
                             viewModel = loginViewModel,
                             onLoginSuccess = {
                                 val user = auth.currentUser
-                                val hasPhoneLinked = user?.providerData?.any { it.providerId == PhoneAuthProvider.PROVIDER_ID } ?: false
+                                if (user?.email == null) {
+                                    return@LoginScreen
+                                }
 
-                                if (hasPhoneLinked) {
-                                    // 6. ✅ SỬA LOGIC: Khởi chạy MainActivity
-                                    goToMainActivity()
-                                } else {
-                                    // Chuyển sang 2FA
-                                    navController.navigate("otp_2fa")
+                                // ⭐️ TÌM VAI TRÒ DỰA TRÊN EMAIL
+                                lifecycleScope.launch {
+                                    // ⭐️ GỌI HÀM MỚI (ĐỌC TỪ FIRESTORE)
+                                    val account = accountRepository.getAccountByEmailFromFirestore(user.email!!)
+                                    val userRole = account?.role ?: "Customer" // Mặc định là Customer nếu không tìm thấy
+
+                                    val hasPhoneLinked = user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+
+                                    if (hasPhoneLinked) {
+                                        goToMainActivity(userRole)
+                                    } else {
+                                        // Chuyển sang 2FA
+                                        navController.navigate("otp_2fa/${userRole}")
+                                    }
                                 }
                             },
                             onNavigateToRegister = { navController.navigate("register") }
@@ -87,20 +117,20 @@ class LoginActivity : ComponentActivity() {
                         )
                     }
 
-                    composable("otp_2fa") {
+                    // Thêm {userRole} vào định nghĩa route
+                    composable("otp_2fa/{userRole}") { backStackEntry ->
+                        // Lấy userRole từ đường dẫn
+                        val userRole = backStackEntry.arguments?.getString("userRole") ?: "Customer"
+
                         val phoneAuthViewModel = ViewModelProvider(this@LoginActivity, viewModelFactory)[PhoneAuthViewModel::class.java]
                         PhoneAuthScreen(
                             viewModel = phoneAuthViewModel,
                             onVerificationSuccess = {
-                                // 7. ✅ SỬA LOGIC: Sau khi 2FA cũng phải vào MainActivity
-                                goToMainActivity()
+                                // Truyền userRole khi gọi hàm
+                                goToMainActivity(userRole)
                             }
                         )
                     }
-
-                    // 8. (KHÔNG CÒN) composable("home") đã bị xóa.
-                    //    Màn hình "home" cũ của bạn (MortgageListScreen)
-                    //    sẽ được hiển thị BÊN TRONG MainActivity.
                 }
             }
         }
@@ -109,9 +139,12 @@ class LoginActivity : ComponentActivity() {
     /**
      * 9. Hàm mới để khởi chạy MainActivity
      */
-    private fun goToMainActivity() {
+    private fun goToMainActivity(userRole: String) {
         val intent = Intent(this, MainActivity::class.java)
-        // Cờ này rất quan trọng để xóa LoginActivity khỏi stack
+
+        //  Gửi vai trò (role) sang MainActivity
+        intent.putExtra("USER_ROLE", userRole)
+
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish() // Đóng LoginActivity

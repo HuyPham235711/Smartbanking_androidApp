@@ -13,6 +13,7 @@ fun CheckingDetailEntry(
     navController: NavController,
     viewModel: CheckingDetailViewModel,
     onAccountSelected: (String) -> Unit,
+    onLogout: () -> Unit, // 1. Nhận hàm logout
     modifier: Modifier = Modifier
 ) {
     val account = viewModel.account.collectAsState().value
@@ -29,8 +30,8 @@ fun CheckingDetailEntry(
         CheckingDetailScreen(
             viewModel = viewModel,
             onBack = { navController.popBackStack() },
-            onOpenTransactions = { navController.navigate("transaction/${account.id}") }
+            onOpenTransactions = { navController.navigate("transaction/${account.id}") },
+            onLogout = onLogout // 2. Truyền hàm logout xuống
         )
     }
 }
-

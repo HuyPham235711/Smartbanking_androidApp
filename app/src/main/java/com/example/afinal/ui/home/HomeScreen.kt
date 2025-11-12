@@ -28,7 +28,10 @@ import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    onLogout: () -> Unit // 1. Nhận hàm logout
+) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getDatabase(context) }
 
@@ -98,6 +101,7 @@ fun HomeScreen(navController: NavController) {
                 navController = navController,
                 viewModel = checkingVm,
                 onAccountSelected = { selectedAccountId = it },
+                onLogout = onLogout, // 2. Truyền hàm logout xuống
                 modifier = Modifier.padding(padding)
             )
 

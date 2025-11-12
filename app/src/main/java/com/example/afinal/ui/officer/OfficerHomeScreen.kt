@@ -6,6 +6,8 @@ import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Person
+// 1. IMPORT ICON ĐĂNG XUẤT
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,7 +24,8 @@ import com.example.afinal.viewmodel.officer.OfficerMortgageViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OfficerHomeScreen(
-    navController: NavController
+    navController: NavController,
+    onLogout: () -> Unit // 2. NHẬN HÀM LOGOUT
 ) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getDatabase(context) }
@@ -38,7 +41,20 @@ fun OfficerHomeScreen(
     var selectedTab by rememberSaveable { mutableStateOf("account_tab") }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Officer Dashboard") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Officer Dashboard") },
+                // 3. THÊM NÚT ACTION VÀO TOP BAR
+                actions = {
+                    IconButton(onClick = onLogout) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.Logout,
+                            contentDescription = "Đăng xuất"
+                        )
+                    }
+                }
+            )
+        },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
