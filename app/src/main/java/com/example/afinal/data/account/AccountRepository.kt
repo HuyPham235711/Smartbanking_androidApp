@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+// 1. THÊM CÁC IMPORT NÀY
+import com.google.firebase.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.firestore.toObject
+import kotlinx.coroutines.tasks.await
 
 /**
  * Repository chịu trách nhiệm gọi DAO và xử lý logic trung gian.
@@ -19,6 +24,9 @@ class AccountRepository(private val accountDao: AccountDao) :
 
     private val firebaseSync = FirebaseSyncService(SyncConfig.Collections.ACCOUNTS)
 
+    // 2. THÊM BIẾN NÀY
+    private val firestoreDb = Firebase.firestore
+
     // -----------------------------
     // 🔸 Room Local Operations
     // -----------------------------
@@ -27,6 +35,34 @@ class AccountRepository(private val accountDao: AccountDao) :
     fun observeAllAccounts(): Flow<List<Account>> = accountDao.observeAll()
 
     suspend fun getAccountById(id: String) = accountDao.getAccountById(id)
+
+    // Hàm này đọc từ ROOM (dữ liệu cục bộ)
+    suspend fun getAccountByEmail(email: String) = accountDao.getAccountByEmail(email)
+
+    /**
+     * 3. THÊM HÀM MỚI NÀY
+     * Hàm này đọc TRỰC TIẾP TỪ FIRESTORE (dữ liệu mới nhất)
+     */
+    suspend fun getAccountByEmailFromFirestore(email: String): Account? {
+        return try {
+            val snapshot = firestoreDb.collection(SyncConfig.Collections.ACCOUNTS)
+                .whereEqualTo("email", email)
+                .limit(1)
+                .get()
+                .await()
+
+            if (snapshot.isEmpty) {
+                null // Không tìm thấy
+            } else {
+                // Chuyển đổi Map<String, Any> sang AccountDTO rồi sang Account
+                snapshot.documents.first().data?.toAccountDTO()?.toEntity()
+            }
+        } catch (e: Exception) {
+            println("❌ Lỗi khi getAccountByEmailFromFirestore: ${e.message}")
+            null
+        }
+    }
+
 
     suspend fun insertAccount(account: Account, isRemote: Boolean = false) {
         accountDao.insertAccount(account)
@@ -75,7 +111,4 @@ class AccountRepository(private val accountDao: AccountDao) :
     suspend fun getAllAccountsOnce(): List<Account> {
         return accountDao.getAllAccounts()
     }
-
-
-
 }
