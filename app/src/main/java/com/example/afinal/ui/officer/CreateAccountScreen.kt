@@ -17,6 +17,9 @@ import com.example.afinal.viewmodel.account.AccountViewModelFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.UUID
+// 1. THÊM CÁC IMPORT CẦN THIẾT
+import com.example.afinal.data.auth.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 
 /**
  * Compose UI cho Officer quản lý tài khoản (Create / Update / Delete).
@@ -31,9 +34,12 @@ fun CreateAccountScreen(
     val db = AppDatabase.getDatabase(context)
     val repo = remember { AccountRepository(db.accountDao()) }
 
-    // ViewModel
+    // 2. LẤY AUTH REPOSITORY
+    val authRepo = remember { AuthRepository(FirebaseAuth.getInstance()) }
+
+    // 3. CẬP NHẬT FACTORY
     val viewModel: AccountViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-        factory = AccountViewModelFactory(repo)
+        factory = AccountViewModelFactory(repo, authRepo) // Truyền authRepo
     )
 
     // State cho form nhập
@@ -68,7 +74,7 @@ fun CreateAccountScreen(
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Password (ít nhất 6)") },
             modifier = Modifier.fillMaxWidth()
         )
         OutlinedTextField(
@@ -95,25 +101,30 @@ fun CreateAccountScreen(
         // 🟢 Nút tạo hoặc cập nhật
         Button (
             onClick = {
+                // 4. SỬA LOGIC TẠO:
+                // ID sẽ được gán tự động bởi ViewModel sau khi tạo Auth
                 val account = Account(
-                    id =  selectedAccount?.id ?: UUID.randomUUID().toString(), // Nếu đang edit, giữ lại id
+                    id =  selectedAccount?.id ?: "", // Sẽ bị ghi đè nếu là tài khoản mới
                     username = username.trim(),
                     password = password.trim(),
                     fullName = fullName.trim(),
                     email = email.trim(),
                     phone = phone.trim(),
-                    role = "Customer"
+                    role = "Customer" // Officer luôn tạo ra Customer
                 )
 
-                if (account.username.isNotEmpty() && account.password.isNotEmpty()) {
-                    scope.launch(Dispatchers.IO) {
-                        if (selectedAccount != null) {
+                if (account.email.isNotEmpty() && account.password.length >= 6) {
+                    // 5. GỌI HÀM CREATE HOẶC UPDATE TƯƠNG ỨNG
+                    if (selectedAccount != null) {
+                        scope.launch(Dispatchers.IO) {
                             println("🟡 Updating account id=${account.id} username=${account.username}")
                             viewModel.updateAccount(account)
-                        } else {
-                            println("🟢 Creating new account: ${account.username}")
-                            viewModel.createAccount(account)
                         }
+                    } else {
+                        // Gọi hàm createAccount mới (đã sửa trong ViewModel)
+                        // Nó sẽ tự tạo Auth VÀ Firestore
+                        println("🟢 Creating new account (Auth+Firestore): ${account.email}")
+                        viewModel.createAccount(account.email, account.password, account)
                     }
                 }
 

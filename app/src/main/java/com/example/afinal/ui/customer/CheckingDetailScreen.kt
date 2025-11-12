@@ -16,14 +16,15 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-
+import androidx.compose.ui.Alignment
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CheckingDetailScreen(
     viewModel: CheckingDetailViewModel,
     onBack: () -> Unit,
-    onOpenTransactions: () -> Unit
+    onOpenTransactions: () -> Unit,
+    onLogout: () -> Unit // 1. Nhận hàm onLogout
 ) {
     val account = viewModel.account.collectAsState().value
 
@@ -57,12 +58,17 @@ fun CheckingDetailScreen(
                 ) {
                     Column(Modifier.padding(16.dp)) {
 
-                        // Tên
-                        Text(
-                            text = "👤  ${account.fullName}",
-                            style = MaterialTheme.typography.titleLarge,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "👤  ${account.fullName}",
+                                style = MaterialTheme.typography.titleLarge,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
 
                         Spacer(Modifier.height(4.dp))
 
@@ -72,29 +78,25 @@ fun CheckingDetailScreen(
                         Text("Vai trò: ${account.role}")
 
                         Spacer(Modifier.height(12.dp))
-
-                        // Dòng divider
                         Divider(color = Color.Gray.copy(alpha = 0.3f))
 
+                        // --- Phần số dư ---
                         Spacer(Modifier.height(12.dp))
-
-                        // Balance Section
                         Text(
                             text = "Số dư tài khoản",
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.Gray
                         )
-
                         val balanceFormatted = "%,.0f ₫".format(account.balance)
-
                         Text(
                             text = balanceFormatted,
                             style = MaterialTheme.typography.headlineMedium,
                             fontWeight = FontWeight.ExtraBold,
-                            color = Color(0xFF2E7D32) // xanh đô mix ngân hàng
+                            color = Color(0xFF2E7D32)
                         )
                     }
                 }
+
 
                 // --- Các nút hành động ---
                 var showDialog by remember { mutableStateOf(false) }
@@ -169,6 +171,17 @@ fun CheckingDetailScreen(
                 ) {
                     Text("Xem lịch sử giao dịch")
                 }
+
+                // 2. THÊM NÚT ĐĂNG XUẤT
+                Spacer(Modifier.height(8.dp))
+                Button(
+                    onClick = onLogout, // 3. Gọi hàm logout khi nhấn
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Đăng xuất")
+                }
+
             } else {
                 CircularProgressIndicator()
                 Text("Đang tải dữ liệu...", Modifier.padding(top = 8.dp))
@@ -176,6 +189,3 @@ fun CheckingDetailScreen(
         }
     }
 }
-
-
-

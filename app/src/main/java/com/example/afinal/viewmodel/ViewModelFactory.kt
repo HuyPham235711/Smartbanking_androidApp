@@ -3,6 +3,7 @@ package com.example.afinal.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.afinal.data.account.AccountRepository // 1. THÊM IMPORT
 import com.example.afinal.data.auth.AuthRepository
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.mortgage.MortgageRepository
@@ -26,18 +27,20 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
         val db = AppDatabase.getDatabase(context)
         val auth = FirebaseAuth.getInstance()
 
+        // 2. TẠO CÁC REPO DÙNG CHUNG
+        val authRepo = AuthRepository(auth)
+        val accountRepo = AccountRepository(db.accountDao()) // 3. TẠO ACCOUNT REPO
+
         return when {
             modelClass.isAssignableFrom(LoginViewModel::class.java) -> {
-                val repo = AuthRepository(auth)
-                LoginViewModel(repo) as T
+                LoginViewModel(authRepo) as T
             }
             modelClass.isAssignableFrom(RegisterViewModel::class.java) -> {
-                val repo = AuthRepository(auth)
-                RegisterViewModel(repo) as T
+                // 4. TRUYỀN CẢ HAI REPO VÀO REGISTERVIEWMODEL
+                RegisterViewModel(authRepo, accountRepo) as T
             }
             modelClass.isAssignableFrom(PhoneAuthViewModel::class.java) -> {
-                val repo = AuthRepository(auth)
-                PhoneAuthViewModel(repo) as T
+                PhoneAuthViewModel(authRepo) as T
             }
             modelClass.isAssignableFrom(MortgageViewModel::class.java) -> {
                 val repo = MortgageRepository(db.mortgageAccountDao(), db.mortgageScheduleDao())
