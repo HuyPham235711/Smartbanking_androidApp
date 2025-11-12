@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
                 NavHost(
                     navController = navController,
-                    startDestination = "officer_home"
+                    startDestination = "home"
                 ) {
                     // Màn hình chính (Customer tabs)
                     composable("home") {
