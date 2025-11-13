@@ -9,6 +9,8 @@ import com.example.afinal.data.account.AccountRepository
 import com.example.afinal.data.account.Account
 import com.example.afinal.data.transaction.TransactionEntity
 import com.example.afinal.data.transaction.TransactionRepository
+// ⭐️ 1. THÊM IMPORT NÀY
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 class CheckingDetailViewModel(
     val accountRepository: AccountRepository,
@@ -61,7 +63,9 @@ class CheckingDetailViewModel(
         }
     }
 
+    // ⭐️ 2. CẬP NHẬT LẠI HOÀN TOÀN KHỐI INIT
     init {
+        // Khối này để sync 'transactions'
         viewModelScope.launch {
             transactionRepository.listenRemoteChanges().collect { remoteTransactions ->
                 val existingIds = mutableSetOf<String>()
@@ -73,9 +77,16 @@ class CheckingDetailViewModel(
                 }
             }
         }
+
+        // ⭐️ THÊM KHỐI NÀY ĐỂ SYNC 'accounts' (đây là phần bị thiếu)
+        viewModelScope.launch {
+            accountRepository.listenRemoteChanges()
+                .distinctUntilChanged()
+                .collect { remoteAccounts ->
+                    remoteAccounts.forEach { acc ->
+                        accountRepository.insertAccount(acc, isRemote = true)
+                    }
+                }
+        }
     }
-
-
-
-
 }

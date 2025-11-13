@@ -22,9 +22,12 @@ import com.example.afinal.ui.savings.SavingEntry
 import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import com.example.afinal.viewmodel.savings.SavingViewModel
-import com.example.afinal.viewmodel.transaction.TransactionViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+// ⭐️ 1. XÓA 2 IMPORT NÀY (NẾU CÓ):
+// import kotlinx.coroutines.Dispatchers
+// import kotlinx.coroutines.withContext
+// ⭐️ 2. THÊM IMPORT NÀY:
+import androidx.compose.runtime.collectAsState
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,19 +52,35 @@ fun HomeScreen(
     var selectedAccountId by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
 
-    // 🔹 Lấy account đầu tiên khi app mở
-    LaunchedEffect(Unit) {
-        val firstAccount = withContext(Dispatchers.IO) {
-            db.accountDao().getAllAccounts().firstOrNull()
-        }
-        selectedAccountId = firstAccount?.id
-        if (firstAccount != null) {
-            checkingVm.loadAccount(firstAccount.id)
-            println("✅ Auto-selected first account: ${firstAccount.fullName} (${firstAccount.id})")
-        } else {
-            println("⚠️ No accounts found in database.")
+
+    // ⭐️ 3. THAY THẾ HOÀN TOÀN KHỐI `LaunchedEffect(Unit)` CŨ BẰNG CODE NÀY:
+
+    // 🔹 Quan sát danh sách tài khoản từ Room (được cung cấp bởi repo)
+    //    Chúng ta lấy repo từ `checkingVm` đã được khởi tạo
+    val allAccounts by checkingVm.accountRepository.observeAllAccounts().collectAsState(initial = emptyList())
+
+    // 🔹 Tự động chọn tài khoản đầu tiên KHI danh sách được nạp (hoặc thay đổi)
+    LaunchedEffect(allAccounts) {
+        // Chỉ tự động chọn nếu chưa có tài khoản nào được chọn
+        if (selectedAccountId == null) {
+            // Lấy tài khoản Customer đầu tiên (hoặc bất kỳ tài khoản nào nếu không có Customer)
+            val firstAccount = allAccounts.firstOrNull { it.role.equals("Customer", ignoreCase = true) }
+                ?: allAccounts.firstOrNull()
+
+            selectedAccountId = firstAccount?.id
+
+            if (firstAccount != null) {
+                // Nạp dữ liệu vào ViewModel khi tài khoản đầu tiên xuất hiện
+                checkingVm.loadAccount(firstAccount.id)
+                println("✅ Auto-selected first account: ${firstAccount.fullName} (${firstAccount.id})")
+            } else {
+                // Sẽ hiển thị khi app mới mở và chưa kịp sync
+                println("⚠️ No accounts found in database (yet)...")
+            }
         }
     }
+    // (Kết thúc khối thay thế)
+
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("SmartBanking - Customer") }) },
