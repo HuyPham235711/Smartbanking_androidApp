@@ -16,6 +16,8 @@ import com.example.afinal.data.transaction.TransactionDao
 import com.example.afinal.data.mortgage.MortgageAccountEntity
 import com.example.afinal.data.mortgage.MortgageScheduleDao
 import com.example.afinal.data.mortgage.MortgageScheduleEntity
+import com.example.afinal.data.bill.BillPaymentEntity
+import com.example.afinal.data.bill.BillPaymentDao
 
 
 /**
@@ -29,9 +31,10 @@ import com.example.afinal.data.mortgage.MortgageScheduleEntity
         InterestRate::class,
         TransactionEntity::class,
         MortgageAccountEntity::class,
-        MortgageScheduleEntity::class
+        MortgageScheduleEntity::class,
+        BillPaymentEntity::class
     ],
-    version = 13,
+    version = 14,  // ✅ Tăng version từ 13 lên 14
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -45,6 +48,8 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun mortgageAccountDao(): MortgageAccountDao
 
     abstract fun mortgageScheduleDao(): MortgageScheduleDao
+
+    abstract fun billPaymentDao(): BillPaymentDao
 
 
     companion object {
