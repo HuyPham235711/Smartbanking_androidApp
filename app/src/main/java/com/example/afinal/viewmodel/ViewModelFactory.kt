@@ -7,12 +7,14 @@ import com.example.afinal.data.account.AccountRepository // 1. THÊM IMPORT
 import com.example.afinal.data.auth.AuthRepository
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.mortgage.MortgageRepository
+import com.example.afinal.data.bill.BillPaymentRepository
 import com.example.afinal.data.transaction.TransactionRepository
 import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import com.example.afinal.viewmodel.transaction.TransactionViewModel
 import com.example.afinal.viewmodel.auth.LoginViewModel
 import com.example.afinal.viewmodel.auth.PhoneAuthViewModel
 import com.example.afinal.viewmodel.auth.RegisterViewModel
+import com.example.afinal.viewmodel.bill.BillPaymentViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.afinal.viewmodel.officer.EkycViewModel
 
@@ -49,6 +51,12 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             modelClass.isAssignableFrom(TransactionViewModel::class.java) -> {
                 val repo = TransactionRepository(db.transactionDao())
                 TransactionViewModel(repo) as T
+            }
+            modelClass.isAssignableFrom(BillPaymentViewModel::class.java) -> {
+                val billRepo = BillPaymentRepository(db.billPaymentDao())
+                val accountRepo = AccountRepository(db.accountDao())
+                val transRepo = TransactionRepository(db.transactionDao())
+                BillPaymentViewModel(billRepo, accountRepo, transRepo) as T
             }
             modelClass.isAssignableFrom(EkycViewModel::class.java) -> {
                 EkycViewModel() as T
