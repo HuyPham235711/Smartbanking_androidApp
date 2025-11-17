@@ -6,6 +6,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.afinal.data.account.Account
 import com.example.afinal.viewmodel.transfer.TransferViewModel
+import com.example.afinal.viewmodel.transfer.TransferState
+import com.example.afinal.viewmodel.transfer.RecipientSearchState
 import java.text.NumberFormat
 import java.util.*
-import com.example.afinal.viewmodel.transfer.TransferState
-import com.example.afinal.viewmodel.transfer.TransferViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,16 +31,16 @@ fun TransferScreen(
     onBack: () -> Unit
 ) {
     val currentAccount by viewModel.currentAccount.collectAsState()
-    val availableAccounts by viewModel.availableAccounts.collectAsState()
+    val recipientSearchState by viewModel.recipientSearchState.collectAsState()
     val transferState by viewModel.transferState.collectAsState()
 
-    var selectedRecipient by remember { mutableStateOf<Account?>(null) }
+    var recipientId by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var showConfirmDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentAccountId) {
-        viewModel.loadAccounts(currentAccountId)
+        viewModel.loadCurrentAccount(currentAccountId)
     }
 
     Scaffold(
@@ -88,6 +89,11 @@ fun TransferScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
+                            text = "ID: ${account.id}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
+                        )
+                        Text(
                             text = "Số dư: ${formatCurrency(account.balance)}",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.primary
@@ -96,31 +102,165 @@ fun TransferScreen(
                 }
             }
 
-            // Chọn người nhận
+            // Nhập ID người nhận
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "Chọn người nhận",
+                        text = "Thông tin người nhận",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Input field với nút search
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = recipientId,
+                            onValueChange = {
+                                recipientId = it
+                                // Reset search state khi user đổi input
+                                if (it.isEmpty()) {
+                                    viewModel.resetRecipientSearch()
+                                }
+                            },
+                            label = { Text("ID tài khoản người nhận") },
+                            placeholder = { Text("Nhập ID tài khoản") },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true,
+                            isError = recipientSearchState is RecipientSearchState.NotFound
+                        )
+
+                        IconButton(
+                            onClick = {
+                                if (recipientId.isNotEmpty()) {
+                                    viewModel.searchRecipient(recipientId, currentAccountId)
+                                }
+                            },
+                            enabled = recipientId.isNotEmpty() && recipientSearchState !is RecipientSearchState.Loading
+                        ) {
+                            Icon(
+                                Icons.Default.Search,
+                                contentDescription = "Tìm kiếm",
+                                tint = if (recipientId.isNotEmpty())
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    if (availableAccounts.isEmpty()) {
-                        Text(
-                            text = "Không có tài khoản khả dụng",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    } else {
-                        availableAccounts.forEach { recipient ->
-                            RecipientItem(
-                                account = recipient,
-                                isSelected = selectedRecipient?.id == recipient.id,
-                                onClick = { selectedRecipient = recipient }
+                    // Hiển thị kết quả tìm kiếm
+                    when (val state = recipientSearchState) {
+                        is RecipientSearchState.Idle -> {
+                            Text(
+                                text = "💡 Nhập ID tài khoản và nhấn tìm kiếm",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
-                            if (recipient != availableAccounts.last()) {
-                                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                        }
+                        is RecipientSearchState.Loading -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                CircularProgressIndicator(modifier = Modifier.size(20.dp))
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Đang tìm kiếm...",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
+                        is RecipientSearchState.Found -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                                )
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = state.account.fullName,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = state.account.email,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                            )
+                                            Text(
+                                                text = "SĐT: ${state.account.phone}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.Search,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(32.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        is RecipientSearchState.NotFound -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Text(
+                                    text = "❌ Không tìm thấy tài khoản với ID này",
+                                    modifier = Modifier.padding(12.dp),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        is RecipientSearchState.SameAccount -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Text(
+                                    text = "⚠️ Không thể chuyển tiền cho chính mình",
+                                    modifier = Modifier.padding(12.dp),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                        }
+                        is RecipientSearchState.Error -> {
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.errorContainer
+                                )
+                            ) {
+                                Text(
+                                    text = "❌ ${state.message}",
+                                    modifier = Modifier.padding(12.dp),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.error
+                                )
                             }
                         }
                     }
@@ -136,7 +276,8 @@ fun TransferScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 trailingIcon = { Text("VND", modifier = Modifier.padding(end = 8.dp)) },
-                isError = amount.isNotEmpty() && amount.toDoubleOrNull() == null
+                isError = amount.isNotEmpty() && amount.toDoubleOrNull() == null,
+                enabled = recipientSearchState is RecipientSearchState.Found
             )
 
             // Ghi chú
@@ -146,10 +287,11 @@ fun TransferScreen(
                 label = { Text("Nội dung chuyển khoản") },
                 placeholder = { Text("Nhập ghi chú (không bắt buộc)") },
                 modifier = Modifier.fillMaxWidth(),
-                minLines = 2
+                minLines = 2,
+                enabled = recipientSearchState is RecipientSearchState.Found
             )
 
-            // Hiển thị trạng thái
+            // Hiển thị trạng thái transfer
             when (transferState) {
                 is TransferState.Loading -> {
                     LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -192,10 +334,11 @@ fun TransferScreen(
             }
 
             // Nút xác nhận
+            val recipientAccount = (recipientSearchState as? RecipientSearchState.Found)?.account
             Button(
                 onClick = { showConfirmDialog = true },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = selectedRecipient != null &&
+                enabled = recipientAccount != null &&
                         amount.isNotEmpty() &&
                         amount.toDoubleOrNull() != null &&
                         transferState !is TransferState.Loading
@@ -206,7 +349,8 @@ fun TransferScreen(
     }
 
     // Dialog xác nhận
-    if (showConfirmDialog && selectedRecipient != null) {
+    val recipientAccount = (recipientSearchState as? RecipientSearchState.Found)?.account
+    if (showConfirmDialog && recipientAccount != null) {
         AlertDialog(
             onDismissRequest = { showConfirmDialog = false },
             title = { Text("Xác nhận chuyển tiền") },
@@ -215,7 +359,9 @@ fun TransferScreen(
                     Text("Bạn có chắc muốn chuyển:")
                     Spacer(modifier = Modifier.height(8.dp))
                     Text("• Số tiền: ${formatCurrency(amount.toDouble())}")
-                    Text("• Đến: ${selectedRecipient!!.fullName}")
+                    Text("• Đến: ${recipientAccount.fullName}")
+                    Text("• Email: ${recipientAccount.email}")
+                    Text("• ID: ${recipientAccount.id}")
                     Text("• Nội dung: ${description.ifEmpty { "Không có" }}")
                 }
             },
@@ -224,7 +370,7 @@ fun TransferScreen(
                     onClick = {
                         viewModel.executeTransfer(
                             fromAccountId = currentAccountId,
-                            toAccountId = selectedRecipient!!.id,
+                            toAccountId = recipientAccount.id,
                             amount = amount.toDouble(),
                             description = description.ifEmpty { "Chuyển khoản" }
                         )
@@ -240,45 +386,6 @@ fun TransferScreen(
                 }
             }
         )
-    }
-}
-
-@Composable
-fun RecipientItem(
-    account: Account,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        color = if (isSelected)
-            MaterialTheme.colorScheme.primaryContainer
-        else
-            Color.Transparent,
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            RadioButton(
-                selected = isSelected,
-                onClick = onClick
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = account.fullName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = account.email,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-            }
-        }
     }
 }
 
