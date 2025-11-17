@@ -271,4 +271,67 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         updatedAt = (this["updatedAt"] as? Long ?: 0L)
     )
 
+    /**
+     * Extension functions cho SyncMapper
+     */
+// ✅ BillPaymentEntity → BillPaymentDTO
+    fun BillPaymentEntity.toDTO() = BillPaymentDTO(
+        id = id,
+        accountId = accountId,
+        billType = billType,
+        serviceProvider = serviceProvider,
+        customerCode = customerCode,
+        amount = amount,
+        currency = currency,
+        status = status,
+        timestamp = timestamp,
+        description = description,
+        billPeriod = billPeriod
+    )
+
+    // ✅ BillPaymentDTO → BillPaymentEntity
+    fun BillPaymentDTO.toEntity() = BillPaymentEntity(
+        id = id,
+        accountId = accountId,
+        billType = billType,
+        serviceProvider = serviceProvider,
+        customerCode = customerCode,
+        amount = amount,
+        currency = currency,
+        status = status,
+        timestamp = timestamp,
+        description = description,
+        billPeriod = billPeriod
+    )
+
+    // ✅ BillPaymentDTO → Map (cho Firestore)
+    fun BillPaymentDTO.toMap(): Map<String, Any?> = mapOf(
+        "id" to id,
+        "accountId" to accountId,
+        "billType" to billType,
+        "serviceProvider" to serviceProvider,
+        "customerCode" to customerCode,
+        "amount" to amount,
+        "currency" to currency,
+        "status" to status,
+        "timestamp" to timestamp,
+        "description" to (description ?: ""),
+        "billPeriod" to (billPeriod ?: "")
+    )
+
+    // ✅ Map → BillPaymentDTO
+    fun Map<String, Any?>.toBillPaymentDTO() = BillPaymentDTO(
+        id = this["id"] as? String ?: "",
+        accountId = this["accountId"] as? String ?: "",
+        billType = this["billType"] as? String ?: "",
+        serviceProvider = this["serviceProvider"] as? String ?: "",
+        customerCode = this["customerCode"] as? String ?: "",
+        amount = (this["amount"] as? Number)?.toDouble() ?: 0.0,
+        currency = this["currency"] as? String ?: "VND",
+        status = this["status"] as? String ?: "COMPLETED",
+        timestamp = (this["timestamp"] as? Number)?.toLong() ?: 0L,
+        description = this["description"] as? String,
+        billPeriod = this["billPeriod"] as? String
+    )
+
 }
