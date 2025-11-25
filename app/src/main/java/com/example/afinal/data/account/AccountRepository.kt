@@ -89,6 +89,29 @@ class AccountRepository(private val accountDao: AccountDao) :
     }
 
 
+    suspend fun syncAccountsFromFirebase() {
+        try {
+            println("☁️ Syncing accounts from Firebase...")
+
+            // Lấy toàn bộ accounts từ Firestore
+            val remoteAccounts = firebaseSync.getAllOnce { it.toAccountDTO().toEntity() }
+
+            println("📥 Fetched ${remoteAccounts.size} accounts from Firebase")
+
+            // Insert/Update vào Room (với flag isRemote để không push lại)
+            remoteAccounts.forEach { account ->
+                accountDao.insertAccount(account)
+            }
+
+            println("✅ Synced ${remoteAccounts.size} accounts to local database")
+
+        } catch (e: Exception) {
+            println("❌ Failed to sync accounts from Firebase: ${e.message}")
+            throw e
+        }
+    }
+
+
     suspend fun getFirstAccountId(): String? = accountDao.getFirstAccountId()
 
     // -----------------------------

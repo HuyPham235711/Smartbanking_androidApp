@@ -6,7 +6,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.remember
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -15,6 +14,7 @@ import com.example.afinal.data.account.AccountRepository
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.mortgage.MortgageRepository
 import com.example.afinal.data.transaction.TransactionRepository
+import com.example.afinal.data.bill.BillPaymentRepository
 import com.example.afinal.ui.home.HomeScreen
 import com.example.afinal.ui.mortgage.MortgageDetailScreen
 import com.example.afinal.ui.officer.OfficerHomeScreen
@@ -22,18 +22,19 @@ import com.example.afinal.ui.officer.CreateAccountScreen
 import com.example.afinal.ui.officer.mortgage.OfficerMortgageDetailScreen
 import com.example.afinal.ui.theme.FinalTheme
 import com.example.afinal.ui.transaction.TransactionHistoryScreen
+import com.example.afinal.ui.transfer.TransferScreen
+import com.example.afinal.ui.bill.BillPaymentScreen
 import com.example.afinal.utils.SessionManager
 import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 import com.example.afinal.viewmodel.mortgage.MortgageDetailViewModel
 import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import com.example.afinal.viewmodel.officer.OfficerMortgageDetailViewModel
-import com.example.afinal.viewmodel.officer.OfficerMortgageViewModel
 import com.example.afinal.viewmodel.transaction.TransactionViewModel
+import com.example.afinal.viewmodel.transfer.TransferViewModel
+import com.example.afinal.viewmodel.bill.BillPaymentViewModel
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
         // (Toàn bộ code repository và viewmodel của bạn giữ nguyên)
         val accountRepo = AccountRepository(db.accountDao())
         val transRepo = TransactionRepository(db.transactionDao())
+        val billPaymentRepo = BillPaymentRepository(db.billPaymentDao())
         val mortgageRepo = MortgageRepository(
             accountDao = db.mortgageAccountDao(),
             scheduleDao = db.mortgageScheduleDao()
@@ -81,6 +83,16 @@ class MainActivity : ComponentActivity() {
             )
         )
         val checkingVm = CheckingDetailViewModel(accountRepo, transRepo)
+
+        // ✅ Transfer ViewModel
+        val transferVm = TransferViewModel(accountRepo, transRepo)
+
+        // ✅ Bill Payment ViewModel
+        val billPaymentVm = BillPaymentViewModel(
+            billPaymentRepository = billPaymentRepo,
+            accountRepository = accountRepo,
+            transactionRepository = transRepo
+        )
 
         setContent {
             FinalTheme {
@@ -111,6 +123,29 @@ class MainActivity : ComponentActivity() {
                     composable("account_tab") {
                         CreateAccountScreen()
                     }
+
+                    //  Transfer Screen
+                    composable("transfer/{accountId}") { backStackEntry ->
+                        val accountId = backStackEntry.arguments?.getString("accountId")
+                            ?: return@composable
+                        TransferScreen(
+                            currentAccountId = accountId,
+                            viewModel = transferVm,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+
+                    //  Bill Payment Screen
+                    composable("bill_payment/{accountId}") { backStackEntry ->
+                        val accountId = backStackEntry.arguments?.getString("accountId")
+                            ?: return@composable
+                        BillPaymentScreen(
+                            currentAccountId = accountId,
+                            viewModel = billPaymentVm,
+                            onBack = { navController.popBackStack() }
+                        )
+                    }
+
 
                     // Mortgage detail (được mở từ Customer hoặc Officer)
                     composable("mortgage_detail/{id}") { backStackEntry ->
@@ -176,7 +211,13 @@ class MainActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         if (sessionManager.isSessionExpired()) {
-            logout()
+            FirebaseAuth.getInstance().signOut()
+            sessionManager.clearSession()
+
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            finish()
         }
     }
 }

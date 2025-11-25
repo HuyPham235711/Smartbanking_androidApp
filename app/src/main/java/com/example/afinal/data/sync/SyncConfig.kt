@@ -9,6 +9,7 @@ object SyncConfig {
         const val SCHEDULES = "schedules"
         const val TRANSACTIONS = "transactions"
         const val INTEREST = "interest"
+        const val BILL_PAYMENTS = "bill_payments"
 
     }
 }
