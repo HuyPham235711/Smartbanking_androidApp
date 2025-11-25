@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 
@@ -13,7 +14,7 @@ fun CheckingDetailEntry(
     navController: NavController,
     viewModel: CheckingDetailViewModel,
     onAccountSelected: (String) -> Unit,
-    onLogout: () -> Unit, // 1. Nhận hàm logout
+    onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val account = viewModel.account.collectAsState().value
@@ -24,14 +25,26 @@ fun CheckingDetailEntry(
 
     if (account == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Chưa có tài khoản nào được chọn.")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(Modifier.height(16.dp))
+                Text("Đang tải thông tin tài khoản...")
+            }
         }
     } else {
         CheckingDetailScreen(
             viewModel = viewModel,
             onBack = { navController.popBackStack() },
-            onOpenTransactions = { navController.navigate("transaction/${account.id}") },
-            onLogout = onLogout // 2. Truyền hàm logout xuống
+            onOpenTransactions = {
+                navController.navigate("transaction/${account.id}")
+            },
+            onTransfer = {
+                navController.navigate("transfer/${account.id}")
+            },
+            onBillPayment = {
+                navController.navigate("bill_payment/${account.id}")
+            },
+            onLogout = onLogout
         )
     }
 }
