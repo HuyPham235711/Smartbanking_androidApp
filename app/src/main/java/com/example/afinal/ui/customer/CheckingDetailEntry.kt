@@ -13,22 +13,34 @@ import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 fun CheckingDetailEntry(
     navController: NavController,
     viewModel: CheckingDetailViewModel,
-    onAccountSelected: (String) -> Unit,
+    loggedInAccountId: String?,
     onLogout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val account = viewModel.account.collectAsState().value
 
-    LaunchedEffect(account?.id) {
-        if (account != null) onAccountSelected(account.id)
+    LaunchedEffect(loggedInAccountId) {
+        if (loggedInAccountId != null) {
+            viewModel.loadAccount(loggedInAccountId)
+        }
     }
 
+    val account = viewModel.account.collectAsState().value
+
     if (account == null) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                CircularProgressIndicator()
-                Spacer(Modifier.height(16.dp))
-                Text("Đang tải thông tin tài khoản...")
+        Column(
+            modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            CircularProgressIndicator()
+            Spacer(Modifier.height(16.dp))
+            Text("Đang tải thông tin tài khoản...")
+
+            Spacer(Modifier.height(32.dp))
+
+            // ⭐ NÚT LOGOUT KHẨN CẤP
+            Button(onClick = onLogout) {
+                Text("Đăng xuất")
             }
         }
     } else {

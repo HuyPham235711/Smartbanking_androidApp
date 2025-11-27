@@ -1,7 +1,6 @@
 package com.example.afinal.data.savings
 
 import com.example.afinal.data.sync.*
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
 import com.example.afinal.data.sync.SyncMapper.toMap
 import com.example.afinal.data.sync.SyncMapper.toSavingsDTO
@@ -51,7 +50,7 @@ class SavingRepository(private val dao: SavingsAccountDao) : SyncableRepository<
     // 🔸 Firebase Sync Interface
     // -----------------------------
     override suspend fun pushLocalChange(entity: SavingsAccount) {
-        val dto = entity.toDTO()
+        val dto = entity.toSavingsDTO()
         firebaseSync.upsert(dto.id.toString(), dto.toMap())
     }
 

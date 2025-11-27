@@ -1,7 +1,6 @@
 package com.example.afinal.data.interest
 
 import com.example.afinal.data.sync.*
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
 import com.example.afinal.data.sync.SyncMapper.toInterestDTO
 import com.example.afinal.data.sync.SyncMapper.toMap
@@ -25,7 +24,7 @@ class InterestRateRepository(
     // =============================
 
     override suspend fun pushLocalChange(entity: InterestRate) {
-        val dto = entity.toDTO()
+        val dto = entity.toInterestDTO()
         firebaseSync.upsert(dto.termMonths.toString(), dto.toMap())
     }
 

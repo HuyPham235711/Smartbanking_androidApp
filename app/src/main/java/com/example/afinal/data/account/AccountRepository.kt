@@ -2,7 +2,6 @@ package com.example.afinal.data.account
 
 import com.example.afinal.data.sync.*
 import com.example.afinal.data.sync.SyncMapper.toAccountDTO
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
 import com.example.afinal.data.sync.SyncMapper.toMap
 import kotlinx.coroutines.flow.Flow
@@ -118,8 +117,8 @@ class AccountRepository(private val accountDao: AccountDao) :
     // 🔸 Firebase Sync Interface
     // -----------------------------
     override suspend fun pushLocalChange(entity: Account) {
-        val dto = entity.toDTO()
-        firebaseSync.upsert(entity.id, dto.toMap())   // vì giờ id đã là String UUID
+        val dto = entity.toAccountDTO()
+        firebaseSync.upsert(entity.id, dto.toMap())
     }
 
     override fun listenRemoteChanges(): Flow<List<Account>> {

@@ -1,7 +1,6 @@
 package com.example.afinal.data.transaction
 
 import com.example.afinal.data.sync.*
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
 import com.example.afinal.data.sync.SyncMapper.toMap
 import com.example.afinal.data.sync.SyncMapper.toTransactionDTO
@@ -25,7 +24,7 @@ class TransactionRepository(
     // =============================
 
     override suspend fun pushLocalChange(entity: TransactionEntity) {
-        val dto = entity.toDTO()
+        val dto = entity.toTransactionDTO()
         try {
             firebaseSync.upsert(dto.id, dto.toMap())
             println("✅ Firestore upsert success [transactions/${dto.id}] (${dto.type})")

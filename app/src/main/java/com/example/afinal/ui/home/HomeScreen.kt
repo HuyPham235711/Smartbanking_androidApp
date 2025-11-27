@@ -22,29 +22,29 @@ import com.example.afinal.ui.savings.SavingEntry
 import com.example.afinal.viewmodel.account.CheckingDetailViewModel
 import com.example.afinal.viewmodel.mortgage.MortgageViewModel
 import com.example.afinal.viewmodel.savings.SavingViewModel
-// ⭐️ 1. XÓA 2 IMPORT NÀY (NẾU CÓ):
-// import kotlinx.coroutines.Dispatchers
-// import kotlinx.coroutines.withContext
-// ⭐️ 2. THÊM IMPORT NÀY:
-import androidx.compose.runtime.collectAsState
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+
 fun HomeScreen(
     navController: NavController,
-    onLogout: () -> Unit // 1. Nhận hàm logout
+    onLogout: () -> Unit,
+    checkingVm: CheckingDetailViewModel,
+    loggedInAccountId: String?
 ) {
     val context = LocalContext.current
     val db = remember { AppDatabase.getDatabase(context) }
 
-    // Repository + ViewModels
     val accountRepo = remember { AccountRepository(db.accountDao()) }
     val transRepo = remember { TransactionRepository(db.transactionDao()) }
     val savingRepo = remember { SavingRepository(db.savingsAccountDao()) }
-    val mortgageRepo = remember { MortgageRepository(db.mortgageAccountDao(), db.mortgageScheduleDao()) }
+    val mortgageRepo = remember {
+        MortgageRepository(
+            db.mortgageAccountDao(),
+            db.mortgageScheduleDao()
+        )
+    }
 
-    val checkingVm = remember { CheckingDetailViewModel(accountRepo, transRepo) }
     val savingVm = remember { SavingViewModel(savingRepo) }
     val mortgageVm = remember { MortgageViewModel(mortgageRepo) }
 
@@ -52,35 +52,13 @@ fun HomeScreen(
     var selectedAccountId by rememberSaveable { mutableStateOf<String?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
 
-
-    // ⭐️ 3. THAY THẾ HOÀN TOÀN KHỐI `LaunchedEffect(Unit)` CŨ BẰNG CODE NÀY:
-
-    // 🔹 Quan sát danh sách tài khoản từ Room (được cung cấp bởi repo)
-    //    Chúng ta lấy repo từ `checkingVm` đã được khởi tạo
-    val allAccounts by checkingVm.accountRepository.observeAllAccounts().collectAsState(initial = emptyList())
-
-    // 🔹 Tự động chọn tài khoản đầu tiên KHI danh sách được nạp (hoặc thay đổi)
-    LaunchedEffect(allAccounts) {
-        // Chỉ tự động chọn nếu chưa có tài khoản nào được chọn
-        if (selectedAccountId == null) {
-            // Lấy tài khoản Customer đầu tiên (hoặc bất kỳ tài khoản nào nếu không có Customer)
-            val firstAccount = allAccounts.firstOrNull { it.role.equals("Customer", ignoreCase = true) }
-                ?: allAccounts.firstOrNull()
-
-            selectedAccountId = firstAccount?.id
-
-            if (firstAccount != null) {
-                // Nạp dữ liệu vào ViewModel khi tài khoản đầu tiên xuất hiện
-                checkingVm.loadAccount(firstAccount.id)
-                println("✅ Auto-selected first account: ${firstAccount.fullName} (${firstAccount.id})")
-            } else {
-                // Sẽ hiển thị khi app mới mở và chưa kịp sync
-                println("⚠️ No accounts found in database (yet)...")
-            }
+    // ⭐ Load đúng account ID đăng nhập
+    LaunchedEffect(loggedInAccountId) {
+        if (loggedInAccountId != null) {
+            selectedAccountId = loggedInAccountId
+            checkingVm.loadAccount(loggedInAccountId)
         }
     }
-    // (Kết thúc khối thay thế)
-
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("SmartBanking - Customer") }) },
@@ -89,38 +67,32 @@ fun HomeScreen(
                 NavigationBarItem(
                     selected = selectedTab == "checking",
                     onClick = { selectedTab = "checking" },
-                    icon = { Icon(Icons.Default.Person, contentDescription = "Checking") },
+                    icon = { Icon(Icons.Default.Person, null) },
                     label = { Text("Checking") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "saving",
                     onClick = { selectedTab = "saving" },
-                    icon = { Icon(Icons.Default.AttachMoney, contentDescription = "Savings") },
+                    icon = { Icon(Icons.Default.AttachMoney, null) },
                     label = { Text("Savings") }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "mortgage",
                     onClick = { selectedTab = "mortgage" },
-                    icon = { Icon(Icons.Default.AccountBalance, contentDescription = "Mortgage") },
+                    icon = { Icon(Icons.Default.AccountBalance, null) },
                     label = { Text("Mortgage") }
                 )
             }
-        },
-        // 🟢 FAB chỉ hiển thị ở tab Savings
-        floatingActionButton = {
-            if (selectedTab == "saving") {
-                FloatingActionButton(onClick = { showAddDialog = true }) {
-                    Icon(Icons.Default.AttachMoney, contentDescription = "Tạo sổ tiết kiệm")
-                }
-            }
         }
     ) { padding ->
+
         when (selectedTab) {
+
             "checking" -> CheckingDetailEntry(
                 navController = navController,
                 viewModel = checkingVm,
-                onAccountSelected = { selectedAccountId = it },
-                onLogout = onLogout, // 2. Truyền hàm logout xuống
+                loggedInAccountId = loggedInAccountId,
+                onLogout = onLogout,
                 modifier = Modifier.padding(padding)
             )
 
@@ -145,7 +117,7 @@ fun HomeScreen(
                     modifier = Modifier.padding(padding)
                 )
             }
-
         }
     }
 }
+
