@@ -9,7 +9,6 @@ import com.example.afinal.data.bill.BillPaymentDao
 import com.example.afinal.data.sync.dto.BillPaymentDTO
 import com.example.afinal.data.sync.SyncMapper
 import com.example.afinal.data.sync.SyncMapper.toBillPaymentDTO
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
 import com.example.afinal.data.sync.SyncMapper.toMap
 
@@ -49,7 +48,7 @@ class BillPaymentRepository(
      */
     // Trong BillPaymentRepository.kt
     override suspend fun pushLocalChange(entity: BillPaymentEntity) {
-        val dto = entity.toDTO()
+        val dto = entity.toBillPaymentDTO()
         try {
             // ✅ Filter null values trước khi upsert
             val map = dto.toMap().filterValues { it != null } as Map<String, Any>

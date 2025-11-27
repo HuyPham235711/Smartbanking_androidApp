@@ -1,6 +1,7 @@
 package com.example.afinal.data.sync
 
 import com.example.afinal.data.account.Account
+import com.example.afinal.data.bill.BillPaymentEntity
 import com.example.afinal.data.interest.InterestRate
 import com.example.afinal.data.mortgage.MortgageAccountEntity
 import com.example.afinal.data.mortgage.MortgageScheduleEntity
@@ -12,9 +13,9 @@ import java.util.UUID
 object SyncMapper {
 
     // -----------------------------
-// 🔸 Account Mapping (UUID-based)
-// -----------------------------
-    fun Account.toDTO() = AccountDTO(
+    // 🔸 Account Mapping (UUID-based)
+    // -----------------------------
+    fun Account.toAccountDTO() = AccountDTO(
         id = id,
         username = username,
         password = password,
@@ -60,9 +61,9 @@ object SyncMapper {
     )
 
     // -----------------------------
-// 🔸 SavingsAccount Mapping
-// -----------------------------
-    fun SavingsAccount.toDTO() = SavingsDTO(
+    // 🔸 SavingsAccount Mapping
+    // -----------------------------
+    fun SavingsAccount.toSavingsDTO() = SavingsDTO(
         id = id,
         ownerAccountId = ownerAccountId,
         balance = balance,
@@ -102,11 +103,10 @@ object SyncMapper {
         maturityDate = this["maturityDate"] as? String ?: ""
     )
 
-
     // -----------------------------
-// 🔸 MortgageAccount Mapping
-// -----------------------------
-    fun MortgageAccountEntity.toDTO() = MortgageDTO(
+    // 🔸 MortgageAccount Mapping
+    // -----------------------------
+    fun MortgageAccountEntity.toMortgageDTO() = MortgageDTO(
         id = id,
         accountName = accountName,
         principal = principal,
@@ -155,9 +155,9 @@ object SyncMapper {
     )
 
     // -----------------------------
-// 🔸 MortgageSchedule Mapping
-// -----------------------------
-    fun MortgageScheduleEntity.toDTO() = ScheduleDTO(
+    // 🔸 MortgageSchedule Mapping
+    // -----------------------------
+    fun MortgageScheduleEntity.toScheduleDTO() = ScheduleDTO(
         id = id,
         mortgageId = mortgageId,
         period = period,
@@ -200,18 +200,19 @@ object SyncMapper {
         totalAmount = (this["totalAmount"] as? Double ?: 0.0),
         status = this["status"] as? String ?: "PENDING"
     )
-// -----------------------------
-// 🔸 Transaction Mapping
-// -----------------------------
-fun TransactionEntity.toDTO() = TransactionDTO(
-    id = id,
-    accountId = accountId,
-    amount = amount,
-    currency = currency,
-    type = type,
-    description = description,
-    timestamp = timestamp
-)
+
+    // -----------------------------
+    // 🔸 Transaction Mapping
+    // -----------------------------
+    fun TransactionEntity.toTransactionDTO() = TransactionDTO(
+        id = id,
+        accountId = accountId,
+        amount = amount,
+        currency = currency,
+        type = type,
+        description = description,
+        timestamp = timestamp
+    )
 
     fun TransactionDTO.toEntity() = TransactionEntity(
         id = id,
@@ -223,7 +224,6 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         timestamp = timestamp
     )
 
-    // ✅ THÊM HÀM NÀY
     fun TransactionDTO.toMap(): Map<String, Any> = mapOf(
         "id" to id,
         "accountId" to accountId,
@@ -244,11 +244,10 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         timestamp = (this["timestamp"] as? Number)?.toLong() ?: 0L
     )
 
-
     // -----------------------------
-// 🔸 InterestRate Mapping
-// -----------------------------
-    fun InterestRate.toDTO() = InterestDTO(
+    // 🔸 InterestRate Mapping
+    // -----------------------------
+    fun InterestRate.toInterestDTO() = InterestDTO(
         termMonths = termMonths,
         rate = rate,
         updatedAt = System.currentTimeMillis()
@@ -271,11 +270,10 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         updatedAt = (this["updatedAt"] as? Long ?: 0L)
     )
 
-    /**
-     * Extension functions cho SyncMapper
-     */
-// ✅ BillPaymentEntity → BillPaymentDTO
-    fun BillPaymentEntity.toDTO() = BillPaymentDTO(
+    // -----------------------------
+    // 🔸 BillPayment Mapping
+    // -----------------------------
+    fun BillPaymentEntity.toBillPaymentDTO() = BillPaymentDTO(
         id = id,
         accountId = accountId,
         billType = billType,
@@ -289,7 +287,6 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         billPeriod = billPeriod
     )
 
-    // ✅ BillPaymentDTO → BillPaymentEntity
     fun BillPaymentDTO.toEntity() = BillPaymentEntity(
         id = id,
         accountId = accountId,
@@ -304,7 +301,6 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         billPeriod = billPeriod
     )
 
-    // ✅ BillPaymentDTO → Map (cho Firestore)
     fun BillPaymentDTO.toMap(): Map<String, Any?> = mapOf(
         "id" to id,
         "accountId" to accountId,
@@ -319,7 +315,6 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         "billPeriod" to (billPeriod ?: "")
     )
 
-    // ✅ Map → BillPaymentDTO
     fun Map<String, Any?>.toBillPaymentDTO() = BillPaymentDTO(
         id = this["id"] as? String ?: "",
         accountId = this["accountId"] as? String ?: "",
@@ -333,5 +328,4 @@ fun TransactionEntity.toDTO() = TransactionDTO(
         description = this["description"] as? String,
         billPeriod = this["billPeriod"] as? String
     )
-
 }

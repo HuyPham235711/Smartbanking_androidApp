@@ -3,7 +3,6 @@ package com.example.afinal.data.mortgage
 import com.example.afinal.data.database.AppDatabase
 import com.example.afinal.data.sync.FirebaseSyncService
 import com.example.afinal.data.sync.SyncConfig
-import com.example.afinal.data.sync.SyncMapper.toDTO
 import com.example.afinal.data.sync.SyncMapper.toMap
 import com.example.afinal.data.sync.SyncMapper.toMortgageDTO
 import com.example.afinal.data.sync.SyncMapper.toEntity
@@ -148,12 +147,12 @@ class MortgageRepository(
     // ============================================================== //
 
     private suspend fun pushLocalChangeAccount(entity: MortgageAccountEntity) {
-        val dto = entity.toDTO()
+        val dto = entity.toMortgageDTO()
         firebaseAccountSync.upsert(dto.id, dto.toMap())
     }
 
     private suspend fun pushLocalChangeSchedule(entity: MortgageScheduleEntity) {
-        val dto = entity.toDTO()
+        val dto = entity.toScheduleDTO()
         firebaseScheduleSync.upsert(dto.id, dto.toMap())
         println("☁️ Synced schedule ${dto.id} to Firestore (status=${dto.status})")
     }

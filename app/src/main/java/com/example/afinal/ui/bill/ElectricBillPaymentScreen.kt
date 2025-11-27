@@ -163,7 +163,6 @@ fun ElectricBillPaymentScreen(
                     Spacer(Modifier.height(12.dp))
 
                     InfoRow("Nhà cung cấp", info.serviceProvider)
-                    InfoRow("Khách hàng", info.customerName)
                     info.address?.let { InfoRow("Địa chỉ", it) }
                     info.period?.let { InfoRow("Kỳ hóa đơn", it) }
 

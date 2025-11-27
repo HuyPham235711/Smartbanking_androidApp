@@ -54,6 +54,15 @@ fun SavingScreen(
             }
         }
 
+        FloatingActionButton(
+            onClick = { showDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Default.Add, contentDescription = "Thêm Sổ Tiết Kiệm")
+        }
+
 
         if (showDialog || showAddDialog) {
             AddSavingDialog(

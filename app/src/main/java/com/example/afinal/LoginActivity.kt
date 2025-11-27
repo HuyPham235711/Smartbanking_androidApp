@@ -53,11 +53,17 @@ class LoginActivity : ComponentActivity() {
                 if (user?.email != null) {
                     // ⭐️ GỌI HÀM MỚI (ĐỌC TỪ FIRESTORE)
                     val account = accountRepository.getAccountByEmailFromFirestore(user.email!!)
+
+                    if (account != null) {
+                        accountRepository.insertAccount(account)   // ⭐ LƯU ACCOUNT VÀO ROOM
+                    }
+
                     val userRole = account?.role ?: "Customer"
-                    goToMainActivity(userRole)
+                    val accountId = account?.id
+                    goToMainActivity(userRole, accountId!!)
                 } else {
                     // Trường hợp hiếm: user tồn tại nhưng không có email (ví dụ: chỉ đăng nhập SĐT)
-                    goToMainActivity("Customer") // Mặc định là Customer
+                    goToMainActivity("Customer", "001") // Mặc định là Customer
                 }
             }
             return // Dừng hàm onCreate ở đây
@@ -83,24 +89,25 @@ class LoginActivity : ComponentActivity() {
                         LoginScreen(
                             viewModel = loginViewModel,
                             onLoginSuccess = {
-                                val user = auth.currentUser
-                                if (user?.email == null) {
-                                    return@LoginScreen
-                                }
+                                val user = auth.currentUser ?: return@LoginScreen
 
-                                // ⭐️ TÌM VAI TRÒ DỰA TRÊN EMAIL
                                 lifecycleScope.launch {
-                                    // ⭐️ GỌI HÀM MỚI (ĐỌC TỪ FIRESTORE)
                                     val account = accountRepository.getAccountByEmailFromFirestore(user.email!!)
-                                    val userRole = account?.role ?: "Customer" // Mặc định là Customer nếu không tìm thấy
 
-                                    val hasPhoneLinked = user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+                                    if (account != null) {
+                                        accountRepository.insertAccount(account)  // ⭐ NEW
+                                    }
 
-                                    if (hasPhoneLinked) {
-                                        goToMainActivity(userRole)
+                                    val userRole = account?.role ?: "Customer"
+                                    val accountId = account?.id ?: return@launch
+
+                                    val hasPhone =
+                                        user.providerData.any { it.providerId == PhoneAuthProvider.PROVIDER_ID }
+
+                                    if (hasPhone) {
+                                        goToMainActivity(userRole, accountId)
                                     } else {
-                                        // Chuyển sang 2FA
-                                        navController.navigate("otp_2fa/${userRole}")
+                                        navController.navigate("otp_2fa/$userRole/$accountId")
                                     }
                                 }
                             },
@@ -118,16 +125,21 @@ class LoginActivity : ComponentActivity() {
                     }
 
                     // Thêm {userRole} vào định nghĩa route
-                    composable("otp_2fa/{userRole}") { backStackEntry ->
-                        // Lấy userRole từ đường dẫn
-                        val userRole = backStackEntry.arguments?.getString("userRole") ?: "Customer"
+                    // ⭐ ROUTE: otp_2fa/{userRole}/{accountId}
+                    composable("otp_2fa/{userRole}/{accountId}") { backStackEntry ->
 
-                        val phoneAuthViewModel = ViewModelProvider(this@LoginActivity, viewModelFactory)[PhoneAuthViewModel::class.java]
+                        val userRole = backStackEntry.arguments?.getString("userRole")!!
+                        val accountId = backStackEntry.arguments?.getString("accountId")!!
+
+                        val phoneAuthViewModel = ViewModelProvider(
+                            this@LoginActivity,
+                            viewModelFactory
+                        )[PhoneAuthViewModel::class.java]
+
                         PhoneAuthScreen(
                             viewModel = phoneAuthViewModel,
                             onVerificationSuccess = {
-                                // Truyền userRole khi gọi hàm
-                                goToMainActivity(userRole)
+                                goToMainActivity(userRole, accountId)
                             }
                         )
                     }
@@ -139,14 +151,12 @@ class LoginActivity : ComponentActivity() {
     /**
      * 9. Hàm mới để khởi chạy MainActivity
      */
-    private fun goToMainActivity(userRole: String) {
+    private fun goToMainActivity(userRole: String, accountId: String) {
         val intent = Intent(this, MainActivity::class.java)
-
-        //  Gửi vai trò (role) sang MainActivity
         intent.putExtra("USER_ROLE", userRole)
-
+        intent.putExtra("ACCOUNT_ID", accountId)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
-        finish() // Đóng LoginActivity
+        finish()
     }
 }

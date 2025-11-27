@@ -4,6 +4,8 @@ import android.text.format.DateFormat
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,59 +13,59 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.afinal.data.transaction.TransactionEntity
-import java.util.*
 import com.example.afinal.viewmodel.transaction.TransactionViewModel
+import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionHistoryScreen(
     viewModel: TransactionViewModel,
-    accountId: String   // ✅ thêm dòng này
+    accountId: String,
+    onClose: () -> Unit
 ) {
     val transactions by viewModel.transactions.collectAsState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = "Lịch sử giao dịch",
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // ✅ Giờ có accountId thật
-        Button(onClick = {
-            val fakeTx = TransactionEntity(
-                accountId = accountId,   // ✅ dùng accountId thật
-                amount = 5000.0,
-                type = "DEPOSIT",
-                description = "Giao dịch test thủ công",
-                currency = "VND",
-                timestamp = System.currentTimeMillis()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Lịch sử giao dịch") },
+                navigationIcon = {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Default.Close, contentDescription = "Đóng")
+                    }
+                }
             )
-            viewModel.addTransaction(fakeTx)
-        }) {
-            Text("Thêm giao dịch test")
         }
+    ) { innerPadding ->
 
-        Spacer(Modifier.height(12.dp))
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp)
+        ) {
 
-        if (transactions.isEmpty()) {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Chưa có giao dịch nào.")
-            }
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(transactions) { item ->
-                    TransactionItem(item)
+            if (transactions.isEmpty()) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Chưa có giao dịch nào.")
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(transactions) { item ->
+                        TransactionItem(item)
+                    }
                 }
             }
         }
     }
 }
+
 
 
 @Composable
