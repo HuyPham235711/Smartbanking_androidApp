@@ -17,6 +17,7 @@ import com.example.afinal.viewmodel.auth.RegisterViewModel
 import com.example.afinal.viewmodel.bill.BillPaymentViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.example.afinal.viewmodel.officer.EkycViewModel
+import com.example.afinal.viewmodel.auth.ForgotPasswordViewModel
 
 /**
  * Lớp "nhà máy" chịu trách nhiệm tạo ra tất cả các ViewModel trong ứng dụng.
@@ -60,6 +61,9 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             }
             modelClass.isAssignableFrom(EkycViewModel::class.java) -> {
                 EkycViewModel() as T
+            }
+            modelClass.isAssignableFrom(ForgotPasswordViewModel::class.java) -> {
+                ForgotPasswordViewModel(authRepo) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

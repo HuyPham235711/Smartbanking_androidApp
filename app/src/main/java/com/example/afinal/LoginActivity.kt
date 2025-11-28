@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.afinal.data.account.AccountRepository
 import com.example.afinal.data.database.AppDatabase
 import kotlinx.coroutines.launch
+import com.example.afinal.viewmodel.auth.ForgotPasswordViewModel
 
 
 class LoginActivity : ComponentActivity() {
@@ -111,7 +112,20 @@ class LoginActivity : ComponentActivity() {
                                     }
                                 }
                             },
-                            onNavigateToRegister = { navController.navigate("register") }
+                            onNavigateToRegister = { navController.navigate("register") },
+                            onNavigateToForgotPassword = { navController.navigate("forgot_password") }
+                        )
+                    }
+
+                    composable("forgot_password") {
+                        val forgotPwViewModel = ViewModelProvider(
+                            this@LoginActivity,
+                            viewModelFactory
+                        )[ForgotPasswordViewModel::class.java]
+
+                        ForgotPasswordScreen(
+                            viewModel = forgotPwViewModel,
+                            onNavigateBack = { navController.popBackStack() }
                         )
                     }
 
