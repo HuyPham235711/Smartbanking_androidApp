@@ -125,6 +125,20 @@ class AuthRepository(private val auth: FirebaseAuth) {
             }
         awaitClose { /* Cleanup */ }
     }
+
+    fun sendPasswordResetEmail(email: String): Flow<Result<String>> = callbackFlow {
+
+        auth.sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    trySend(Result.success("Đã gửi email đặt lại mật khẩu! Vui lòng kiểm tra hộp thư."))
+                } else {
+                    trySend(Result.failure(Exception(task.exception?.message ?: "Lỗi không xác định")))
+                }
+                close()
+            }
+        awaitClose { }
+    }
 }
 
 // Sealed class để quản lý các trạng thái của việc gửi OTP

@@ -18,7 +18,8 @@ import kotlinx.coroutines.launch
 fun LoginScreen(
     viewModel: LoginViewModel,
     onLoginSuccess: () -> Unit,
-    onNavigateToRegister: () -> Unit
+    onNavigateToRegister: () -> Unit,
+    onNavigateToForgotPassword: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -123,6 +124,10 @@ fun LoginScreen(
                     } else {
                         Text("Đăng nhập")
                     }
+                }
+
+                TextButton(onClick = onNavigateToForgotPassword) {
+                    Text("Quên mật khẩu?")
                 }
 
                 TextButton(onClick = onNavigateToRegister) {
